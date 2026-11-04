@@ -1,7 +1,7 @@
 // Service Worker der Webseite: hält App, Startseite und Symbole für den Offline-Betrieb bereit.
 // Erst Netz (damit Updates sofort ankommen), ohne Netz aus dem Speicher. Die Version setzt app/build.py ein.
 const CACHE = "fahrtkosten-/*VERSION*/";
-const DATEIEN = ["./", "index.html", "app.html", "manifest.webmanifest", "symbol-512.png", "apple-touch-icon.png"];
+const DATEIEN = ["./", "index.html", "app.html", "impressum.html", "manifest.webmanifest", "symbol-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(DATEIEN)).then(() => self.skipWaiting()));

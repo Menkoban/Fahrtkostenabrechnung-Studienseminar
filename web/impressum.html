@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Impressum – /*NAME*/</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#373736">
+<link rel="icon" type="image/png" href="symbol-512.png">
+<style>
+:root { --bg: #f0f0ef; --surface: #ffffff; --ink: #232322; --muted: #5f5f61; --line: #d6d6d3; --accent: #e4013a; --strong: #373736; --strong-ink: #ffffff; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1b1b1a; --surface: #262625; --ink: #ededeb; --muted: #a8a8a5; --line: #3c3c3a; --accent: #ff5476; --strong: #111110; --strong-ink: #ededeb; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #1b1b1a; --surface: #262625; --ink: #ededeb; --muted: #a8a8a5; --line: #3c3c3a; --accent: #ff5476; --strong: #111110; --strong-ink: #ededeb; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif; }
+.kopf { background: var(--strong); color: var(--strong-ink); padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 14px; }
+.kopf .in, main { max-width: 760px; margin: 0 auto; }
+.kopf a { color: inherit; font-weight: 700; text-decoration: none; }
+main { padding: 20px 16px 40px; display: flex; flex-direction: column; gap: 16px; }
+h1 { font-size: 1.4rem; margin: 0; }
+h2 { font-size: 1.05rem; margin: 0 0 4px; }
+section { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+p { margin: 4px 0; }
+a { color: var(--accent); }
+</style>
+</head>
+<body>
+<header class="kopf"><div class="in"><a href="./">← /*NAME*/</a></div></header>
+<main>
+  <h1>Impressum</h1>
+  <section>
+    <h2>Angaben nach § 18 Abs. 1 Medienstaatsvertrag</h2>
+    <p>/*IMPRESSUM*/</p>
+  </section>
+  <section>
+    <h2>Hinweis</h2>
+    <p>Privates, nicht-kommerzielles Hilfsmittel für Lehrkräfte im Vorbereitungsdienst. Kein offizielles Angebot des
+      Studienseminars Osnabrück für berufsbildende Schulen oder des Regionalen Landesamts für Schule und Bildung (RLSB).</p>
+    <p>Die App ist eine Ausfüllhilfe ohne Gewähr. Maßgeblich sind die Vorgaben des RLSB; festgesetzt wird die Erstattung dort.</p>
+  </section>
+  <section>
+    <h2>Datenschutz</h2>
+    <p>Die App speichert alle Angaben nur auf deinem Gerät und überträgt nichts. Diese Seite wird über GitHub Pages
+      (GitHub, Inc.) ausgeliefert; dabei verarbeitet GitHub beim Abruf technisch die IP-Adresse.</p>
+  </section>
+</main>
+</body>
+</html>

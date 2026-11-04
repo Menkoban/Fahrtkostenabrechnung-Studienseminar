@@ -37,6 +37,8 @@ Logo „Fahrschein“: Quelle in `android/symbol.js` (`node android/symbol.js` e
 und veröffentlicht sie. Quellen: `web/index.html` (Startseite), `web/sw.js` (Offline-Betrieb), `web/manifest.webmanifest`,
 Symbole aus `node android/symbol.js`. APK, HTML und Anleitung kommen aus dem Repo, deshalb vor dem Push neu bauen.
 Einmalig nötig: Repo öffentlich und unter Settings → Pages als Source „GitHub Actions“ wählen.
+Die Seite ist für Suchmaschinen gesperrt (`noindex`) und nur über den geteilten Link gedacht. Das Impressum
+(`web/impressum.html`) füllt `app/build.py` aus `IMPRESSUM_NAME` und `IMPRESSUM_ANSCHRIFT`; ohne Namen bricht der Bau ab.
 
 ### Ändern, testen, bauen
 

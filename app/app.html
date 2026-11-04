@@ -1014,7 +1014,7 @@ function viewEinstellungen() {
     ${ui.bestaetigen === "alles" ? `<div class="row"><span class="grow">Wirklich alle Angaben und Fahrten löschen?</span><button type="button" class="btn danger" id="alles-ja">Alles löschen</button><button type="button" class="btn" id="alles-nein">Abbrechen</button></div>`
       : `<button type="button" class="btn ghost danger" id="alles" style="align-self:flex-start">Alle Daten löschen</button>`}
   </fieldset>
-  <p class="hint">Fahrtkosten Planer Studienseminar BBS OS, Version ${APP_VERSION}${window.AndroidApp ? " (Android)" : ""}. Regeln nach dem Leitfaden Reisekosten im Vorbereitungsdienst des RLSB, Stand 01.01.2025. Die Festsetzung macht das RLSB.</p></div>`;
+  <p class="hint">Fahrtkosten Planer Studienseminar BBS OS, Version ${APP_VERSION}${window.AndroidApp ? " (Android)" : ""}. Regeln nach dem Leitfaden Reisekosten im Vorbereitungsdienst des RLSB, Stand 01.01.2025. Die Festsetzung macht das RLSB.${document.querySelector('link[rel="manifest"]') ? ' · <a href="impressum.html">Impressum</a>' : ""}</p></div>`;
 }
 
 // ---------- Profil: speichert sich selbst (kurz nach dem Tippen, beim Verlassen eines Feldes und vor jedem Neuzeichnen)

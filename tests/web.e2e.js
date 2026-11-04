@@ -53,6 +53,14 @@ async function main() {
   const apk = await page.request.get(basis + "Fahrtkosten.apk");
   assert.equal((await apk.body()).subarray(0, 2).toString(), "PK");
 
+  // Nicht in Suchmaschinen; Impressum mit Anschrift über die Fußzeile erreichbar
+  assert.equal(await page.locator('meta[name="robots"]').getAttribute("content"), "noindex, nofollow");
+  await page.click("footer >> text=Impressum");
+  await page.getByRole("heading", { name: "Impressum" }).waitFor();
+  assert.match(await page.locator("main").textContent(), /Sachsenring 9.*49733 Haren \(Ems\)/s);
+  assert.equal(await page.locator('meta[name="robots"]').getAttribute("content"), "noindex, nofollow");
+  await page.goBack();
+
   // Manifest und Symbole
   const manifest = await (await page.request.get(basis + "manifest.webmanifest")).json();
   assert.equal(manifest.short_name, "Fahrtkosten");
@@ -64,6 +72,7 @@ async function main() {
   await page.waitForURL(/app\.html$/);
   await page.waitForSelector("#willkommen-beispiel");
   assert.equal(await page.locator('link[rel="apple-touch-icon"]').getAttribute("href"), "apple-touch-icon.png");
+  assert.equal(await page.locator('meta[name="robots"]').getAttribute("content"), "noindex, nofollow");
   await page.evaluate(() => navigator.serviceWorker.ready);
   await page.reload();   // jetzt vom Service Worker kontrolliert
   await page.waitForFunction(() => !!navigator.serviceWorker.controller);
@@ -78,6 +87,9 @@ async function main() {
   assert.match(download.suggestedFilename(), /^Reisekosten_.*\.pdf$/);
   await page.waitForFunction(() => document.querySelectorAll("#vorschau canvas").length >= 4, null, { timeout: 30000 });
   await page.screenshot({ path: path.join(FOTOS, "web_app_offline.png") });
+  // Impressum auch aus der App erreichbar (Meine Daten, Versionszeile)
+  await page.click("#tab-einstellungen");
+  assert.equal(await page.locator('a[href="impressum.html"]').count(), 1);
   // Startseite offline aus dem Speicher
   await page.goto(basis);
   await page.getByRole("heading", { name: "Fahrtkosten Planer Studienseminar BBS OS" }).waitFor();
