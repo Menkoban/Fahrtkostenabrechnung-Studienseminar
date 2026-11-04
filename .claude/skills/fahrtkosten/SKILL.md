@@ -5,14 +5,16 @@ description: Reisekostenabrechnung im Vorbereitungsdienst (Niedersachsen, RLSB) 
 
 # Fahrtkosten abrechnen
 
-Arbeitsordner ist der Projektordner `Fahrkostenabrechnung`. Alle Regeln stehen im Skript
+Arbeitsordner ist das Repo `Fahrtkostenabrechnung-Studienseminar`. Alle Regeln stehen im Skript
 `werkzeug/fahrtkosten.py` (Konstanten oben) – nicht selbst nachrechnen, sondern das Skript laufen lassen.
 
 **Wichtig:** Die Hauptversion ist inzwischen die App (`app/kern.js` + `app/app.html`, gebaut mit `python app/build.py`
 zu `Fahrtkosten-App.html`, Online-Version und APK). Nur die App kann mehrtägige Reisen, Mitfahrt/Fahrgemeinschaft,
 Tagegeld-Knopf, Strecke ab Ausbildungsschule (Nr. 2.1.5 VV-NRKVO) mit Einführungswoche und Doppel-Warnungen.
 Das Python-Skript rechnet nur Tagesfahrten. Bittet der Nutzer um Änderungen an der Abrechnung, die App ändern,
-neu bauen und alle drei Versionen aktualisieren (README, Abschnitt „App“).
+testen (`node --test tests/`, `node tests/app.e2e.js`), neu bauen und alle drei Versionen aktualisieren
+(README, Abschnitt „App“: HTML, APK, claude.ai-Link). Die APK lässt sich auch in der Cloud bauen (README, „Android-Build“);
+den Signaturschlüssel stellt der Nutzer bereit, er gehört nie ins Repo.
 
 ## 0. Einrichtung prüfen
 

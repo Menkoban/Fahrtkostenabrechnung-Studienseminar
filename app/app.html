@@ -192,6 +192,7 @@ nav.tabs button[aria-current="page"] { color: var(--accent); }
 <script>
 "use strict";
 const K = window.Kern;
+const APP_VERSION = "/*VERSION*/";
 const TYPEN = { wohnung: "Wohnung", ausbildungsschule: "Ausbildungsschule", seminar: "Studienseminar", sonstiges: "Sonstiger Ort" };
 const MITTEL = { pkw: "Pkw", mitfahrt: "Mitfahrt", oepnv: "Bus/Bahn", fahrrad: "Fahrrad" };
 
@@ -864,8 +865,13 @@ async function speichereMitMeldung(name, bytes, zusatz = "") {
 let pdfjsLaden = null;
 function ladePdfjs() {
   const skript = (src) => new Promise((ok, fehler) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = fehler; document.head.appendChild(s); });
-  pdfjsLaden = pdfjsLaden || skript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js")
-    .then(() => skript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"))
+  // Offline-Version (Fahrtkosten-App.html, Android): pdf.js liegt eingebettet in der Datei und wird erst hier geladen
+  const quelle = (id, url) => {
+    const el = document.getElementById(id);
+    return el ? URL.createObjectURL(new Blob([el.textContent], { type: "text/javascript" })) : url;
+  };
+  pdfjsLaden = pdfjsLaden || skript(quelle("lib-pdfjs", "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"))
+    .then(() => skript(quelle("lib-pdfjs-worker", "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js")))
     .then(() => window.pdfjsLib);
   return pdfjsLaden;
 }
@@ -974,7 +980,7 @@ function viewEinstellungen() {
       <button type="button" class="btn ghost danger small" data-ort-weg="${i}" style="align-self:flex-start">Ort entfernen</button></div>`).join("")}</div>
     <div class="row"><button type="button" class="btn" id="ort-neu">+ Ort hinzufügen</button>
       <label for="ort-liste" class="grow" style="min-width:12rem"><select id="ort-liste"><option value="">+ Weitere Schule aus der Liste (z. B. für Hospitationen)</option>
-        ${SCHULEN_OS.filter((s) => !o.orte.some((x) => (x.adresse || "") === `${s.name}, ${s.adresse}`)).map((s) => `<option value="${esc(s.kurz)}">${esc(s.name)}</option>`).join("")}</select></label></div>
+        ${SCHULEN_OS.filter((s) => !o.orte.some((x) => [`${s.name}, ${s.adresse}`, `${s.kurz}, ${s.adresse}`].includes(x.adresse || ""))).map((s) => `<option value="${esc(s.kurz)}">${esc(s.name)}</option>`).join("")}</select></label></div>
     <span class="hint">Kurznamen erscheinen als Knöpfe beim Eintragen einer Fahrt, z. B. „Wohnung“, „Schule“, „Seminar“.</span>
   </fieldset>
 
@@ -1007,7 +1013,8 @@ function viewEinstellungen() {
     ${Object.values(Store.docs).some((d) => d && d.beispiel) ? `<button type="button" class="btn danger" id="beispiel-weg">Beispieldaten löschen</button>` : ""}
     ${ui.bestaetigen === "alles" ? `<div class="row"><span class="grow">Wirklich alle Angaben und Fahrten löschen?</span><button type="button" class="btn danger" id="alles-ja">Alles löschen</button><button type="button" class="btn" id="alles-nein">Abbrechen</button></div>`
       : `<button type="button" class="btn ghost danger" id="alles" style="align-self:flex-start">Alle Daten löschen</button>`}
-  </fieldset></div>`;
+  </fieldset>
+  <p class="hint">Fahrtkosten-App Version ${APP_VERSION}${window.AndroidApp ? " (Android)" : ""}. Regeln nach dem Leitfaden Reisekosten im Vorbereitungsdienst des RLSB, Stand 01.01.2025. Die Festsetzung macht das RLSB.</p></div>`;
 }
 
 // ---------- Profil: speichert sich selbst (kurz nach dem Tippen, beim Verlassen eines Feldes und vor jedem Neuzeichnen)
@@ -1078,7 +1085,7 @@ function hookEinstellungen() {
     const s = SCHULEN_OS.find((x) => x.kurz === e.target.value); if (!s) return;
     const o = JSON.parse(JSON.stringify(orte()));
     let name = s.kurz; while (o.orte.some((x) => x.name === name)) name += "+";
-    o.orte.push({ name, typ: "sonstiges", adresse: `${s.name}, ${s.adresse}` });
+    o.orte.push({ name, typ: "sonstiges", adresse: `${s.kurz}, ${s.adresse}` });  // kurz, damit es in Spalte 5b der Anlage passt
     toast(`${s.kurz} als Ort hinzugefügt. Entfernungen unten eintragen.`);
     await speichereOrte(o);
   });

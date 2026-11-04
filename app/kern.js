@@ -103,6 +103,22 @@
     return { wohnung: "Wohnort", ausbildungsschule: "Dienstort" }[o.typ] || o.name;
   }
 
+  /**
+   * Kürzere Schreibweisen einer Adresse für enge Formularfelder (Spalte 5b der Anlage):
+   * Stufe 1 kürzt bekannte Schulbezeichnungen ab, Stufe 2 lässt zusätzlich die Straße weg (Name, PLZ Ort).
+   */
+  const ABKUERZUNGEN = [[/Berufsbildende Schulen?/g, "BBS"], [/Berufsbildungszentrum/g, "BBZ"], [/Berufsschulzentrum/g, "BSZ"],
+    [/Studienseminar Osnabrück für berufsbildende Schulen/g, "Studienseminar OS BBS"], [/ – /g, " "], [/straße\b/g, "str."], [/Straße\b/g, "Str."]];
+  function kurzeAdresse(text, stufe) {
+    let t = text;
+    for (const [muster, ersatz] of ABKUERZUNGEN) t = t.replace(muster, ersatz);
+    if (stufe >= 2) {
+      const teile = t.split(/,\s*/);
+      if (teile.length >= 3) t = `${teile.slice(0, teile.length - 2).join(", ")}, ${teile[teile.length - 1]}`;
+    }
+    return t;
+  }
+
   function istMehrtaegig(f) {
     return !!(f.datum && f.datumBis && f.datumBis > f.datum);
   }
@@ -191,6 +207,7 @@
     vergleicheMitDienststaette(f, orte, katalog, route, r);
     const ziele = [...new Set(route)].map((s) => katalog[s]).filter((o) => o.typ !== "wohnung" && o.typ !== "ausbildungsschule");
     r.dienstgeschaeftIn = ziele.map((o) => o.adresse || o.name).join(" / ");
+    r.dienstgeschaeftKurz = [1, 2].map((stufe) => ziele.map((o) => kurzeAdresse(o.adresse || o.name, stufe)).join(" / "));
     // Endet die Route nicht wieder zu Hause bzw. an der Schule, fehlt meist die Rückfahrt – und mit ihr die Hälfte der km
     const letzter = katalog[route[route.length - 1]];
     if (letzter.typ !== "wohnung" && letzter.typ !== "ausbildungsschule") {
@@ -332,7 +349,9 @@
         [`Beginn_der_Fahrt_Wohnort${n}`]: r.beginnIn,
         [`Beginn_der_Fahrt_Uhrzeit${n}`]: f.abfahrt,
         [`Anlass_DR${n}`]: f.anlass || "a",
-        [`Seminarveranstaltung_in_Ort${n}`]: f.anlass === "d" ? `${f.anlassText}: ${r.dienstgeschaeftIn}` : r.dienstgeschaeftIn,
+        // Mehrere Schreibweisen: fuelle() nimmt die erste, die lesbar ins Feld passt
+        [`Seminarveranstaltung_in_Ort${n}`]: [r.dienstgeschaeftIn, ...(r.dienstgeschaeftKurz || [])]
+          .map((ort) => (f.anlass === "d" ? `${f.anlassText}: ${ort}` : ort)),
         [`Seminar_von_Uhrzeit${n}`]: f.veranstVon,
         [`Seminar_bis_Uhrzeit${n}`]: f.veranstBis,
         [`Ende_der_Fahrt_Wohnort${n}`]: r.endeIn,
@@ -521,10 +540,11 @@
     return zeilen;
   }
 
-  function passendeSchrift(font, text, rect) {
+  function passendeSchrift(font, text, rect, gutLesbar) {
     const breite = rect.width - (rect.width < 15 ? 1 : 6), hoehe = rect.height - 2;
     const mehrzeilig = hoehe >= 15;
-    for (const g of [8, 7, 6.5, 6, 5.5, 5, 4.5, 4]) {
+    // gutLesbar: nur Größen ab 5 pt zählen (für die Wahl zwischen langer und kurzer Schreibweise)
+    for (const g of [8, 7, 6.5, 6, 5.5, 5, 4.5, 4].filter((x) => !gutLesbar || x >= 5)) {
       if (!mehrzeilig) {
         if (g <= hoehe * 0.85 && font.widthOfTextAtSize(text, g) <= breite) return { g, mehrzeilig, passt: true };
       } else if (umbrechen(font, text, g, breite).length * g * 1.4 <= hoehe) {
@@ -544,7 +564,10 @@
         if (wert) feld.check();
         continue;
       }
-      let text = machSicher(font, String(wert ?? ""));
+      // Ein Feld kann mehrere Schreibweisen haben (lang bis kurz): die erste nehmen, die gut passt
+      const rect = feld.acroField.getWidgets()[0].getRectangle();
+      const varianten = [...new Set((Array.isArray(wert) ? wert : [wert]).map((v) => machSicher(font, String(v ?? ""))))];
+      let text = varianten.find((v) => passendeSchrift(font, v, rect, true).passt) || varianten[varianten.length - 1];
       if (!text) continue;
       // Viele Formularfelder erlauben höchstens 199 Zeichen: an einer Wortgrenze kürzen statt abzubrechen
       const max = feld.getMaxLength();
@@ -553,7 +576,6 @@
         text = (schnitt.lastIndexOf(" ") > max * 0.6 ? schnitt.slice(0, schnitt.lastIndexOf(" ")) : schnitt) + "…";
         zuLang.push(`${etikett}: ${FELDNAMEN[name.replace(/\d+$/, "")] || name} auf ${max} Zeichen gekürzt`);
       }
-      const rect = feld.acroField.getWidgets()[0].getRectangle();
       const { g, mehrzeilig, passt } = passendeSchrift(font, text, rect);
       if (!passt) zuLang.push(`${etikett}: ${FELDNAMEN[name.replace(/\d+$/, "")] || name} steht in sehr kleiner Schrift`);
       if (mehrzeilig) feld.enableMultiline();
