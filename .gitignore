@@ -5,10 +5,9 @@ ausgabe/
 # Signaturschlüssel der Android-App – wer ihn hat, kann gefälschte Updates signieren
 android/signatur/
 
-# Build-Ergebnisse (entstehen mit python app/build.py und python android/build.py)
+# Zwischenergebnisse (entstehen mit python app/build.py und python android/build.py)
 android/build/
 app/dist/
-Fahrtkosten.apk
 *.apk.idsig
 __pycache__/
 

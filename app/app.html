@@ -1,4 +1,4 @@
-<title>Fahrtkosten Vorbereitungsdienst</title>
+<title>Fahrtkosten Planer Studienseminar BBS OS</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -56,7 +56,7 @@ a { color: var(--accent); }
 .kopf { background: var(--strong); color: var(--strong-ink); padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 10px; }
 .kopf .in { max-width: 720px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
-.kopf .marke { width: 14px; height: 28px; background: var(--accent); flex: none; }
+.kopf .logo { width: 34px; height: 34px; flex: none; display: block; }
 .kopf b { font-family: var(--f-display); font-size: 1rem; letter-spacing: .01em; }
 .kopf span { font-size: .8rem; opacity: .75; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--strong); }
@@ -166,11 +166,11 @@ nav.tabs button[aria-current="page"] { color: var(--accent); }
 @media (prefers-reduced-motion: no-preference) { .toast { animation: hoch .2s ease-out; } @keyframes hoch { from { transform: translate(-50%, 8px); opacity: 0; } } }
 </style>
 
-<header class="kopf"><div class="in"><span class="marke" aria-hidden="true"></span>
-  <div><b>Fahrtkosten</b><br><span>Vorbereitungsdienst · Lehramt an BBS</span></div></div></header>
+<header class="kopf"><div class="in"><img class="logo" src="data:image/png;base64,/*SYMBOL*/" alt="">
+  <div><b>Fahrtkosten Planer</b><br><span>Studienseminar BBS OS · Vorbereitungsdienst</span></div></div></header>
 <div class="wrap" id="main" aria-live="polite">
   <div class="card stack" id="laden">
-    <h2>Fahrtkosten Vorbereitungsdienst</h2>
+    <h2>Fahrtkosten Planer Studienseminar BBS OS</h2>
     <p class="muted">Deine Fahrten werden geladen …</p>
   </div>
 </div>
@@ -192,6 +192,7 @@ nav.tabs button[aria-current="page"] { color: var(--accent); }
 <script>
 "use strict";
 const K = window.Kern;
+const APP_VERSION = "/*VERSION*/";
 const TYPEN = { wohnung: "Wohnung", ausbildungsschule: "Ausbildungsschule", seminar: "Studienseminar", sonstiges: "Sonstiger Ort" };
 const MITTEL = { pkw: "Pkw", mitfahrt: "Mitfahrt", oepnv: "Bus/Bahn", fahrrad: "Fahrrad" };
 
@@ -439,7 +440,7 @@ function hookFahrten() {
 }
 
 function viewWillkommen() {
-  return `<div class="stack"><h1>Fahrtkosten Vorbereitungsdienst</h1>${beispielBanner()}
+  return `<div class="stack"><h1>Fahrtkosten Planer Studienseminar BBS OS</h1>${beispielBanner()}
     <p>Trag deine Seminarfahrten ein, wann immer du unterwegs bist. Am Monatsende erstellt die App daraus den ausgefüllten Antrag 035_002 und die Anlage 035_016 als PDF.</p>
     <div class="card stack"><h3>So richtest du sie ein</h3>
       <ol class="steps"><li>Deine Angaben für das Formular eintragen (Name, Schule, IBAN).</li>
@@ -864,8 +865,13 @@ async function speichereMitMeldung(name, bytes, zusatz = "") {
 let pdfjsLaden = null;
 function ladePdfjs() {
   const skript = (src) => new Promise((ok, fehler) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = fehler; document.head.appendChild(s); });
-  pdfjsLaden = pdfjsLaden || skript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js")
-    .then(() => skript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"))
+  // Offline-Version (Fahrtkosten-App.html, Android): pdf.js liegt eingebettet in der Datei und wird erst hier geladen
+  const quelle = (id, url) => {
+    const el = document.getElementById(id);
+    return el ? URL.createObjectURL(new Blob([el.textContent], { type: "text/javascript" })) : url;
+  };
+  pdfjsLaden = pdfjsLaden || skript(quelle("lib-pdfjs", "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"))
+    .then(() => skript(quelle("lib-pdfjs-worker", "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js")))
     .then(() => window.pdfjsLib);
   return pdfjsLaden;
 }
@@ -974,7 +980,7 @@ function viewEinstellungen() {
       <button type="button" class="btn ghost danger small" data-ort-weg="${i}" style="align-self:flex-start">Ort entfernen</button></div>`).join("")}</div>
     <div class="row"><button type="button" class="btn" id="ort-neu">+ Ort hinzufügen</button>
       <label for="ort-liste" class="grow" style="min-width:12rem"><select id="ort-liste"><option value="">+ Weitere Schule aus der Liste (z. B. für Hospitationen)</option>
-        ${SCHULEN_OS.filter((s) => !o.orte.some((x) => (x.adresse || "") === `${s.name}, ${s.adresse}`)).map((s) => `<option value="${esc(s.kurz)}">${esc(s.name)}</option>`).join("")}</select></label></div>
+        ${SCHULEN_OS.filter((s) => !o.orte.some((x) => [`${s.name}, ${s.adresse}`, `${s.kurz}, ${s.adresse}`].includes(x.adresse || ""))).map((s) => `<option value="${esc(s.kurz)}">${esc(s.name)}</option>`).join("")}</select></label></div>
     <span class="hint">Kurznamen erscheinen als Knöpfe beim Eintragen einer Fahrt, z. B. „Wohnung“, „Schule“, „Seminar“.</span>
   </fieldset>
 
@@ -1007,7 +1013,8 @@ function viewEinstellungen() {
     ${Object.values(Store.docs).some((d) => d && d.beispiel) ? `<button type="button" class="btn danger" id="beispiel-weg">Beispieldaten löschen</button>` : ""}
     ${ui.bestaetigen === "alles" ? `<div class="row"><span class="grow">Wirklich alle Angaben und Fahrten löschen?</span><button type="button" class="btn danger" id="alles-ja">Alles löschen</button><button type="button" class="btn" id="alles-nein">Abbrechen</button></div>`
       : `<button type="button" class="btn ghost danger" id="alles" style="align-self:flex-start">Alle Daten löschen</button>`}
-  </fieldset></div>`;
+  </fieldset>
+  <p class="hint">Fahrtkosten Planer Studienseminar BBS OS, Version ${APP_VERSION}${window.AndroidApp ? " (Android)" : ""}. Regeln nach dem Leitfaden Reisekosten im Vorbereitungsdienst des RLSB, Stand 01.01.2025. Die Festsetzung macht das RLSB.</p></div>`;
 }
 
 // ---------- Profil: speichert sich selbst (kurz nach dem Tippen, beim Verlassen eines Feldes und vor jedem Neuzeichnen)
@@ -1078,7 +1085,7 @@ function hookEinstellungen() {
     const s = SCHULEN_OS.find((x) => x.kurz === e.target.value); if (!s) return;
     const o = JSON.parse(JSON.stringify(orte()));
     let name = s.kurz; while (o.orte.some((x) => x.name === name)) name += "+";
-    o.orte.push({ name, typ: "sonstiges", adresse: `${s.name}, ${s.adresse}` });
+    o.orte.push({ name, typ: "sonstiges", adresse: `${s.kurz}, ${s.adresse}` });  // kurz, damit es in Spalte 5b der Anlage passt
     toast(`${s.kurz} als Ort hinzugefügt. Entfernungen unten eintragen.`);
     await speichereOrte(o);
   });
@@ -1125,7 +1132,7 @@ function hookEinstellungen() {
       if (!inhalt.docs || typeof inhalt.docs !== "object") throw new Error();
       for (const [id, doc] of Object.entries(inhalt.docs)) if (/^(profil|orte|f-[\w-]+)$/.test(id) && doc && typeof doc === "object") await Store.put(id, doc);
       toast("Sicherung eingespielt"); render();
-    } catch (err) { toast("Diese Datei ist keine Sicherung der Fahrtkosten-App"); }
+    } catch (err) { toast("Diese Datei ist keine Sicherung des Fahrtkosten Planers"); }
   });
   document.querySelectorAll("[data-sicherung]").forEach((b) => b.addEventListener("click", () => { ui.bestaetigen = "sicherung-" + b.dataset.sicherung; render(); }));
   const sn = $("#sicherung-nein"); if (sn) sn.addEventListener("click", () => { ui.bestaetigen = ""; render(); });

@@ -1,39 +1,64 @@
-# Fahrtkostenabrechnung Vorbereitungsdienst
+# Fahrtkosten Planer Studienseminar BBS OS
 
 Füllt die Formulare **035_002** (Antrag auf Reisekostenvergütung) und **035_016** (Anlage für
 Studienseminare) automatisch aus – nach dem Leitfaden des RLSB, Stand 01.01.2025.
 
 ## App (Handy und PC)
 
-**https://claude.ai/artifact/Kvtvj73rsH6MEmVpN4TV5r**: privat, nur mit deinem Claude-Konto zu öffnen.
-Fahrten, Orte und Angaben liegen in deinem Konto und sind auf allen Geräten gleich. Die PDFs entstehen im Browser.
+Drei Wege, alle mit demselben Stand (Version 3.1). Auf dem Home-Bildschirm heißt die App kurz „Fahrtkosten“.
+Logo „Fahrschein“: Quelle in `android/symbol.js` (`node android/symbol.js` erzeugt alle Symbolgrößen und `app/symbol.png`).
 
+| Datei | Für | Daten liegen |
+|---|---|---|
+| `Fahrtkosten.apk` | Android 10+, offline, keine Berechtigungen. PDFs landen in `Download/Fahrtkosten` | in der App auf dem Handy |
+| `Fahrtkosten-App.html` | PC (Doppelklick, läuft im Browser) und – unter einer Webadresse – iPhone/iPad über „Zum Home-Bildschirm“ | im Browser auf dem Gerät |
+| **https://claude.ai/artifact/Kvtvj73rsH6MEmVpN4TV5r** | eigene Nutzung mit Claude-Konto | im Claude-Konto, auf allen Geräten gleich |
+
+`Anleitung_Fahrtkosten-App.pdf` erklärt Installation und Bedienung für Referendarinnen und Referendare
+(Quelle: `docs/anleitung.html`, PDF neu erzeugen mit `node docs/anleitung-pdf.js`).
+
+- `Fahrtkosten-App.html` und die APK sind **vollständig offline**: pdf-lib, pdf.js und die Formulare sind eingebettet,
+  es gibt keine Webschriften und keine Verbindung zu Google oder anderen Servern. Nur die claude.ai-Version lädt
+  Bibliotheken und Schriften vom CDN.
 - Tagesfahrten landen in einem Antrag 035_002 mit Anlage 035_016. Jede mehrtägige Reise (z. B. Kompaktseminar) bekommt einen
   eigenen Antrag mit Tagegeld (14 € An-/Abreisetag, 28 € voller Tag), Übernachtung (20 € pauschal oder Hotel lt. Rechnung)
   und gestellten Mahlzeiten. Nach dem Erstellen zeigt die App eine Vorschau aller Seiten; jedes Teil lässt sich einzeln speichern.
 - Weitere Funktionen: Tagegeld automatisch ab mehr als 8 Std. oder per Knopf, Mitfahrt und Fahrgemeinschaft (G4),
   Erkennung fehlender Rückfahrt, Strecke wahlweise ab Wohnung oder kürzer ab Ausbildungsschule (Nr. 2.1.5 VV-NRKVO,
   mit Häkchen „Einführungswoche“), Warnung bei doppelten Tagen und Überschneidungen, Pkw + G-Grund + Fahrrad in einem
-  Antrag (Fahrrad dann unter „sonstige Kosten“), automatisches Speichern und Sicherungen auf dem Gerät.
-- Das Python-Skript kennt nur Tagesfahrten.
-- **Android-App:** `Fahrtkosten.apk` (Android 10+, läuft offline, PDFs landen in `Download/Fahrtkosten`).
-  Neu bauen: `python app/build.py`, dann `python android/build.py`. Werkzeuge liegen in `C:\Users\User\android-build`.
-  Der Signaturschlüssel in `android/signatur/` muss erhalten bleiben, sonst lassen sich Updates nicht über die alte App installieren.
-- Ohne Claude-Konto geht auch `Fahrtkosten-App.html` direkt im Browser. Die Daten bleiben dann nur in diesem Browser.
-- Quellcode: `app/app.html` (Oberfläche), `app/kern.js` (Regeln und PDF-Ausfüllung, gleiche Regeln wie das Python-Skript).
-  Nach Änderungen `python app/build.py` ausführen und `app/dist/fahrtkosten-artifact.html` neu veröffentlichen.
-- App und Python-Skript teilen keine Daten. Nimm eins von beiden.
+  Antrag (Fahrrad dann unter „sonstige Kosten“), lange Schuladressen werden für Spalte 5b lesbar gekürzt,
+  automatisches Speichern und Sicherungen auf dem Gerät.
+- Das Python-Skript kennt nur Tagesfahrten. App und Python-Skript teilen keine Daten. Nimm eins von beiden.
 
-## Repository
+### Ändern, testen, bauen
 
-Privates GitHub-Repo. Bewusst **nicht** enthalten (siehe `.gitignore`):
+Quellcode: `app/app.html` (Oberfläche), `app/kern.js` (Regeln und PDF-Ausfüllung). Versionsnummer: `VERSION` in `app/build.py`.
 
-- `daten/` und `ausgabe/`: persönliche Angaben (IBAN, Adresse) und erzeugte Abrechnungen. Vorlagen liegen in `beispiel/`.
-- `android/signatur/`: der Signaturschlüssel der APK. Nur lokal aufbewahren (liegt im OneDrive-Ordner). Ohne ihn lassen
-  sich Updates nicht über die installierte App spielen.
-- Build-Ergebnisse (`Fahrtkosten.apk`, `app/dist/`, `android/build/`) und die gespeicherten Leitfaden-Dokumente.
+```
+python app/build.py          # Fahrtkosten-App.html (offline) und app/dist/fahrtkosten-artifact.html (claude.ai)
+node --test tests/           # Regeltests für kern.js inkl. PDF-Erzeugung
+node tests/app.e2e.js        # Durchklick-Test der fertigen HTML im Browser (Playwright/Chromium)
+python android/build.py      # Fahrtkosten.apk
+```
 
-`Fahrtkosten-App.html` ist enthalten, damit die App direkt aus dem Repo heruntergeladen werden kann.
+Danach `app/dist/fahrtkosten-artifact.html` unter dem Link oben neu veröffentlichen.
+
+**Android-Build** braucht JDK 17 (mit JDK 21 stürzt d8 ab) und das Android SDK mit build-tools 34.0.0 und platforms/android-34.
+Unter Windows liegen die Werkzeuge in `C:\Users\User\android-build`, sonst gelten `JAVA_HOME` und `ANDROID_HOME`
+(Standard `/opt/android/sdk`). In der Cloud-Sitzung:
+
+```
+curl -sSLo /tmp/cmd.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+unzip -q /tmp/cmd.zip -d /opt/android/sdk/cmdline-tools && mv /opt/android/sdk/cmdline-tools/cmdline-tools /opt/android/sdk/cmdline-tools/latest
+yes | /opt/android/sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=/opt/android/sdk "build-tools;34.0.0" "platforms;android-34"
+curl -sSL https://api.adoptium.net/v3/binary/latest/17/ga/linux/x64/jdk/hotspot/normal/eclipse | tar xz -C /opt/android && mv /opt/android/jdk-17* /opt/android/jdk17
+JAVA_HOME=/opt/android/jdk17 FAHRTKOSTEN_SIGNATUR=/pfad/zur/signatur python3 android/build.py
+```
+
+**Signaturschlüssel:** `fahrtkosten.keystore` + `passwort.txt`, Ordner `android/signatur/` oder `FAHRTKOSTEN_SIGNATUR`.
+Er liegt **nicht** im Repo. Ab Version 3.0 (in der Cloud gebaut) gilt ein neuer Schlüssel
+(SHA-256 des Zertifikats `763baa59…edad4`). Für jedes Update denselben Schlüssel verwenden, sonst lässt sich die APK
+nicht über die installierte App spielen. Fehlt der Ordner, legt der Build einen neuen Schlüssel an.
 
 ## Python-Skript und Claude-Befehl
 
@@ -85,5 +110,8 @@ Selbst nachvollziehen: `python werkzeug/fahrtkosten.py --daten beispiel`
 | `werkzeug/fahrtkosten.py` | das Skript (benötigt Python mit PyMuPDF: `pip install pymupdf`) |
 | `daten/` | deine Angaben und Fahrten |
 | `beispiel/` | Beispieldaten |
+| `app/`, `android/` | Quellcode der App und der Android-Hülle |
+| `tests/` | Regeltests (`node --test tests/`) und Browser-Durchklick (`node tests/app.e2e.js`) |
+| `docs/` | Anleitung (HTML-Quelle und PDF-Erzeugung) |
 | `ausgabe/` | erzeugte Abrechnungen |
 | `.claude/skills/fahrtkosten/` | der Claude-Befehl `/fahrtkosten` |
