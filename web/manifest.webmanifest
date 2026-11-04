@@ -1,0 +1,15 @@
+{
+  "name": "/*NAME*/",
+  "short_name": "/*KURZNAME*/",
+  "description": "Fahrten im Vorbereitungsdienst erfassen und Antrag 035_002 mit Anlage 035_016 als PDF erzeugen.",
+  "lang": "de",
+  "start_url": "app.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f0f0ef",
+  "theme_color": "#373736",
+  "icons": [
+    { "src": "symbol-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+  ]
+}

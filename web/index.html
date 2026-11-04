@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>/*NAME*/</title>
+<meta name="description" content="Fahrten im Vorbereitungsdienst erfassen und Antrag 035_002 mit Anlage 035_016 fertig ausgefüllt als PDF erzeugen. Für Android, iPhone und PC.">
+<meta name="theme-color" content="#373736">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="symbol-512.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="/*KURZNAME*/">
+<style>
+/* Startseite der Webseite: gleiche Farben wie die App (Studienseminar: Rot, Anthrazit, Hellgrau, Bernstein) */
+:root {
+  --bg: #f0f0ef; --surface: #ffffff; --ink: #232322; --muted: #5f5f61; --line: #d6d6d3;
+  --accent: #e4013a; --accent-ink: #ffffff; --accent-soft: #fde5ea; --strong: #373736; --strong-ink: #ffffff;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1b1b1a; --surface: #262625; --ink: #ededeb; --muted: #a8a8a5; --line: #3c3c3a;
+  --accent: #ff5476; --accent-ink: #1b1b1a; --accent-soft: #42161f; --strong: #111110; --strong-ink: #ededeb; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #1b1b1a; --surface: #262625; --ink: #ededeb; --muted: #a8a8a5; --line: #3c3c3a;
+  --accent: #ff5476; --accent-ink: #1b1b1a; --accent-soft: #42161f; --strong: #111110; --strong-ink: #ededeb; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif; }
+.kopf { background: var(--strong); color: var(--strong-ink); padding: calc(18px + env(safe-area-inset-top, 0px)) 16px 18px; }
+.kopf .in, main { max-width: 760px; margin: 0 auto; }
+.kopf .in { display: flex; gap: 14px; align-items: center; }
+.kopf img { width: 56px; height: 56px; border-radius: 13px; flex: none; }
+.kopf h1 { margin: 0; font-size: 1.35rem; line-height: 1.2; text-wrap: balance; }
+.kopf p { margin: 2px 0 0; opacity: .8; font-size: .9rem; }
+main { padding: 20px 16px calc(32px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 16px; }
+h2 { font-size: 1.1rem; margin: 0 0 6px; }
+p { margin: 6px 0; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 12px 18px; border-radius: 10px;
+  font-weight: 700; text-decoration: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-size: 1.05rem; }
+.btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.gross { display: flex; flex-direction: column; gap: 8px; }
+.karten { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.karte { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.karte.hervor { border: 2px solid var(--accent); }
+.karte ol { margin: 0; padding-left: 20px; }
+.karte li { margin: 3px 0; }
+.klein { font-size: .85rem; color: var(--muted); }
+.teilen { display: inline-block; width: 1.05em; height: 1.05em; vertical-align: -0.15em; }
+footer { font-size: .8rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<header class="kopf"><div class="in">
+  <img src="apple-touch-icon.png" alt="">
+  <div><h1>/*NAME*/</h1><p>Fahrtkosten im Vorbereitungsdienst: erfassen, rechnen, Antrag als PDF</p></div>
+</div></header>
+<main>
+  <section class="gross">
+    <p>Trag nach jedem Seminartag kurz deine Fahrt ein. Am Monatsende erstellt die App den <b>Antrag 035_002</b> und die
+      <b>Anlage 035_016</b> fertig ausgefüllt als PDF – nach dem Leitfaden des RLSB (Stand 01.01.2025).
+      Du druckst nur noch aus, unterschreibst und gibst ab.</p>
+    <a class="btn primary" href="app.html">App öffnen</a>
+    <span class="klein">Läuft direkt im Browser. Deine Daten bleiben auf deinem Gerät.</span>
+  </section>
+
+  <section class="karten">
+    <div class="karte" id="iphone">
+      <h2>iPhone und iPad</h2>
+      <ol>
+        <li>Diese Seite in <b>Safari</b> öffnen.</li>
+        <li>Auf <b>„App öffnen“</b> tippen.</li>
+        <li>Unten auf <b>Teilen</b>
+          <svg class="teilen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Teilen-Symbol"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>
+          tippen, dann <b>„Zum Home-Bildschirm“</b>.</li>
+        <li>Ab jetzt die App über das Symbol <b>„Fahrtkosten“</b> starten. Sie läuft dann auch ohne Internet.</li>
+      </ol>
+      <span class="klein">Wichtig: Immer über das Symbol starten. Nur dort bleiben die Daten dauerhaft gespeichert.</span>
+    </div>
+    <div class="karte" id="android">
+      <h2>Android</h2>
+      <a class="btn" href="Fahrtkosten.apk" download>Android-App laden (APK)</a>
+      <ol>
+        <li>Datei antippen, „Installation aus dieser Quelle zulassen“ erlauben.</li>
+        <li>Installieren. PDFs landen in <i>Download/Fahrtkosten</i>.</li>
+      </ol>
+      <span class="klein">Android 10 oder neuer, ohne Internet, ohne Berechtigungen. Alternativ in Chrome „App öffnen“ und im Menü „Zum Startbildschirm hinzufügen“.</span>
+    </div>
+    <div class="karte" id="pc">
+      <h2>PC und Mac</h2>
+      <a class="btn" href="app.html">Im Browser öffnen</a>
+      <a class="btn" href="Fahrtkosten-App.html" download>Als Datei speichern</a>
+      <span class="klein">Die Datei läuft per Doppelklick auch ohne Internet. Immer dieselbe Datei im selben Browser öffnen, dort liegen deine Daten.</span>
+    </div>
+  </section>
+
+  <section class="karte">
+    <h2>Anleitung</h2>
+    <p>Einrichten in fünf Minuten, Fahrten eintragen, abrechnen: alles auf zwei Seiten.</p>
+    <a class="btn" href="Anleitung_Fahrtkosten-App.pdf">Anleitung als PDF</a>
+  </section>
+
+  <section class="karte">
+    <h2>Deine Daten</h2>
+    <p>Name, IBAN und Fahrten speichert die App <b>nur auf deinem Gerät</b>. Sie schickt nichts an einen Server, es gibt kein Konto
+      und keine Statistik. Unter „Meine Daten“ kannst du jederzeit eine Sicherung herunterladen, etwa vor einem Handywechsel.</p>
+    <p class="klein">Diese Seite liegt bei GitHub Pages. Wie jeder Webserver verarbeitet GitHub beim Abruf technisch deine IP-Adresse.
+      Die Android-App und die gespeicherte Datei brauchen danach keine Verbindung mehr.</p>
+  </section>
+
+  <footer>Version /*VERSION*/ · Ausfüllhilfe nach dem Leitfaden Reisekosten im Vorbereitungsdienst (RLSB, Stand 01.01.2025).
+    Festgesetzt wird die Erstattung vom RLSB. Vor dem Abgeben bitte die PDF gegenlesen.</footer>
+</main>
+<script>
+// Auf iPhone/iPad die passende Anleitung zuerst zeigen und hervorheben, auf Android die Android-Karte
+(function () {
+  const ua = navigator.userAgent;
+  const ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const ziel = document.getElementById(ios ? "iphone" : /Android/.test(ua) ? "android" : "pc");
+  ziel.classList.add("hervor");
+  ziel.parentNode.prepend(ziel);
+})();
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>

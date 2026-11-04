@@ -5,11 +5,12 @@ Studienseminare) automatisch aus – nach dem Leitfaden des RLSB, Stand 01.01.20
 
 ## App (Handy und PC)
 
-Drei Wege, alle mit demselben Stand (Version 3.1). Auf dem Home-Bildschirm heißt die App kurz „Fahrtkosten“.
+Alle Wege mit demselben Stand (Version 3.2). Auf dem Home-Bildschirm heißt die App kurz „Fahrtkosten“.
 Logo „Fahrschein“: Quelle in `android/symbol.js` (`node android/symbol.js` erzeugt alle Symbolgrößen und `app/symbol.png`).
 
 | Datei | Für | Daten liegen |
 |---|---|---|
+| **https://menkoban.github.io/Fahrtkostenabrechnung-Studienseminar/** | Webseite mit App, APK und Anleitung. iPhone/iPad: in Safari „App öffnen“ → Teilen → „Zum Home-Bildschirm“, läuft danach offline | im Browser auf dem Gerät |
 | `Fahrtkosten.apk` | Android 10+, offline, keine Berechtigungen. PDFs landen in `Download/Fahrtkosten` | in der App auf dem Handy |
 | `Fahrtkosten-App.html` | PC (Doppelklick, läuft im Browser) und – unter einer Webadresse – iPhone/iPad über „Zum Home-Bildschirm“ | im Browser auf dem Gerät |
 | **https://claude.ai/artifact/Kvtvj73rsH6MEmVpN4TV5r** | eigene Nutzung mit Claude-Konto | im Claude-Konto, auf allen Geräten gleich |
@@ -30,6 +31,13 @@ Logo „Fahrschein“: Quelle in `android/symbol.js` (`node android/symbol.js` e
   automatisches Speichern und Sicherungen auf dem Gerät.
 - Das Python-Skript kennt nur Tagesfahrten. App und Python-Skript teilen keine Daten. Nimm eins von beiden.
 
+### Webseite (GitHub Pages)
+
+`.github/workflows/webseite.yml` baut bei jedem Push auf `main` mit `python app/build.py` die Seite aus `app/dist/web/`
+und veröffentlicht sie. Quellen: `web/index.html` (Startseite), `web/sw.js` (Offline-Betrieb), `web/manifest.webmanifest`,
+Symbole aus `node android/symbol.js`. APK, HTML und Anleitung kommen aus dem Repo, deshalb vor dem Push neu bauen.
+Einmalig nötig: Repo öffentlich und unter Settings → Pages als Source „GitHub Actions“ wählen.
+
 ### Ändern, testen, bauen
 
 Quellcode: `app/app.html` (Oberfläche), `app/kern.js` (Regeln und PDF-Ausfüllung). Versionsnummer: `VERSION` in `app/build.py`.
@@ -38,6 +46,7 @@ Quellcode: `app/app.html` (Oberfläche), `app/kern.js` (Regeln und PDF-Ausfüllu
 python app/build.py          # Fahrtkosten-App.html (offline) und app/dist/fahrtkosten-artifact.html (claude.ai)
 node --test tests/           # Regeltests für kern.js inkl. PDF-Erzeugung
 node tests/app.e2e.js        # Durchklick-Test der fertigen HTML im Browser (Playwright/Chromium)
+node tests/web.e2e.js        # Webseite im iPhone-Format: Startseite, Downloads, offline nach dem ersten Laden
 python android/build.py      # Fahrtkosten.apk
 ```
 
@@ -59,6 +68,18 @@ JAVA_HOME=/opt/android/jdk17 FAHRTKOSTEN_SIGNATUR=/pfad/zur/signatur python3 and
 Er liegt **nicht** im Repo. Ab Version 3.0 (in der Cloud gebaut) gilt ein neuer Schlüssel
 (SHA-256 des Zertifikats `763baa59…edad4`). Für jedes Update denselben Schlüssel verwenden, sonst lässt sich die APK
 nicht über die installierte App spielen. Fehlt der Ordner, legt der Build einen neuen Schlüssel an.
+
+## Repository
+
+Öffentliches GitHub-Repo (für die Webseite über GitHub Pages). Bewusst **nicht** enthalten (siehe `.gitignore`):
+
+- `daten/` und `ausgabe/`: persönliche Angaben (IBAN, Adresse) und erzeugte Abrechnungen. Vorlagen liegen in `beispiel/`.
+- `android/signatur/`: der Signaturschlüssel der APK. Nur sicher außerhalb des Repos aufbewahren (z. B. OneDrive).
+  Ohne ihn lassen sich Updates nicht über die installierte App spielen.
+- Zwischenergebnisse (`app/dist/`, `android/build/`) und die gespeicherten Leitfaden-Dokumente.
+
+`Fahrtkosten-App.html`, `Fahrtkosten.apk` und `Anleitung_Fahrtkosten-App.pdf` sind enthalten, damit sie direkt
+heruntergeladen werden können und die Webseite sie ausliefert.
 
 ## Python-Skript und Claude-Befehl
 
@@ -111,7 +132,8 @@ Selbst nachvollziehen: `python werkzeug/fahrtkosten.py --daten beispiel`
 | `daten/` | deine Angaben und Fahrten |
 | `beispiel/` | Beispieldaten |
 | `app/`, `android/` | Quellcode der App und der Android-Hülle |
-| `tests/` | Regeltests (`node --test tests/`) und Browser-Durchklick (`node tests/app.e2e.js`) |
+| `tests/` | Regeltests (`node --test tests/`), Browser-Durchklick (`node tests/app.e2e.js`), Webseite (`node tests/web.e2e.js`) |
+| `web/`, `.github/workflows/` | Webseite für GitHub Pages |
 | `docs/` | Anleitung (HTML-Quelle und PDF-Erzeugung) |
 | `ausgabe/` | erzeugte Abrechnungen |
 | `.claude/skills/fahrtkosten/` | der Claude-Befehl `/fahrtkosten` |

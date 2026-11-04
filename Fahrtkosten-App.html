@@ -863,7 +863,7 @@ nav.tabs button[aria-current="page"] { color: var(--accent); }
 <script>
 "use strict";
 const K = window.Kern;
-const APP_VERSION = "3.1";
+const APP_VERSION = "3.2";
 const TYPEN = { wohnung: "Wohnung", ausbildungsschule: "Ausbildungsschule", seminar: "Studienseminar", sonstiges: "Sonstiger Ort" };
 const MITTEL = { pkw: "Pkw", mitfahrt: "Mitfahrt", oepnv: "Bus/Bahn", fahrrad: "Fahrrad" };
 
@@ -1870,6 +1870,11 @@ async function beispielLaden() {
 document.querySelectorAll("nav.tabs button").forEach((b) => b.addEventListener("click", () => { if (b.dataset.tab === "abrechnen") ui.abr = null; gehe(b.dataset.tab); }));
 Store.listeners.push(() => { if (ui.view === "fahrten" || ui.view === "abrechnen" || ui.fehler) render(); });
 Store.init();
+// Nur auf der Webseite (dort steht ein Manifest im Kopf): Offline-Betrieb und „Zum Home-Bildschirm“.
+// In der Datei, in der Android-App und auf claude.ai gibt es kein Manifest, dort passiert nichts.
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost") && document.querySelector('link[rel="manifest"]')) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
 </script>
 
 <script type="text/plain" id="lib-pdfjs">/**
