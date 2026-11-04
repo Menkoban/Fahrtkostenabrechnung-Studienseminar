@@ -22,10 +22,10 @@ BIBLIOTHEKEN = BASIS / "android" / "bibliotheken"
 PDF_LIB_CDN = '<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>'
 VERSION = "3.2"
 NAME = "Fahrtkosten Planer Studienseminar BBS OS"
-KURZNAME = "Fahrtkosten"
+KURZNAME = "Fahrtkosten"   # unter dem Symbol auf dem Home-Bildschirm (dort passen nur etwa 11 Zeichen)
 # Impressum der Webseite (§ 18 Abs. 1 Medienstaatsvertrag: Name und Anschrift)
-IMPRESSUM_NAME = ""   # bitte eintragen, ohne Namen bricht der Bau der Webseite ab
-IMPRESSUM_ANSCHRIFT = ["Sachsenring 9", "49733 Haren (Ems)"]   # unter dem Symbol auf dem Home-Bildschirm (dort passen nur etwa 11 Zeichen)
+IMPRESSUM_NAME = "Andre Menke"   # ohne Namen bricht der Bau der Webseite ab
+IMPRESSUM_ANSCHRIFT = ["Sachsenring 9", "49733 Haren (Ems)"]
 
 
 def bibliothek(name):
