@@ -1,0 +1,21 @@
+# Persönliche Angaben (IBAN, Adresse) und erzeugte Abrechnungen – nie hochladen
+daten/
+ausgabe/
+
+# Signaturschlüssel der Android-App – wer ihn hat, kann gefälschte Updates signieren
+android/signatur/
+
+# Build-Ergebnisse (entstehen mit python app/build.py und python android/build.py)
+android/build/
+app/dist/
+Fahrtkosten.apk
+*.apk.idsig
+__pycache__/
+
+# Lokale Sitzungs- und Werkzeugdaten
+.remember/
+.claude/settings.local.json
+
+# Fremde Dokumente (gespeicherte Webseite des Bildungsportals, Leitfaden-PDF)
+Leitfaden Reisekosten im Vorbereitungsdienst*
+leitfaden-genehmigung-von-dienstreisen.pdf

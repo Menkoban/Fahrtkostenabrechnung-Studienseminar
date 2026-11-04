@@ -1,0 +1,17 @@
+{
+  "name": "Mustermann, Max",
+  "amtsbezeichnung": "StRef",
+  "wohnanschrift": "Musterstraße 1, 49074 Osnabrück",
+  "telefon": "0541 123456",
+  "email": "max.mustermann@example.org",
+  "iban": "DE89 3704 0044 0532 0130 00",
+  "bic": "COBADEFFXXX",
+  "beschaeftigungsstelle": "BBS Musterstadt, Schul-Nr. 00000, Musterstadt",
+  "schule_name_adresse": "BBS Musterstadt, Schulstraße 1, 49000 Musterstadt",
+  "abrechnende_dienststelle": "RLSB Osnabrück, Dezernat 1",
+  "standard_verkehrsmittel": "pkw",
+  "bahncard": "nein",
+  "geschaeftskundenrabatt": false,
+  "begruendung_kein_geschaeftskundenrabatt": "Keine BahnCard; Fahrten überwiegend mit privatem Pkw",
+  "ermaessigungskarte": ""
+}

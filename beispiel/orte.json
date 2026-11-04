@@ -1,0 +1,28 @@
+{
+  "orte": {
+    "Wohnung": {
+      "typ": "wohnung",
+      "adresse": "Musterstraße 1, 49074 Osnabrück"
+    },
+    "Schule": {
+      "typ": "ausbildungsschule",
+      "adresse": "BBS Musterstadt, Schulstraße 1, 49000 Musterstadt"
+    },
+    "Seminar": {
+      "typ": "seminar",
+      "adresse": "Studienseminar, Seminarweg 5, 49076 Osnabrück"
+    },
+    "BBS Nord": {
+      "typ": "sonstiges",
+      "adresse": "BBS Nord, Nordring 10, 49090 Osnabrück"
+    }
+  },
+  "entfernungen_km": [
+    ["Wohnung", "Schule", 25],
+    ["Wohnung", "Seminar", 35],
+    ["Schule", "Seminar", 40],
+    ["Wohnung", "BBS Nord", 60],
+    ["BBS Nord", "Seminar", 20]
+  ],
+  "hinweis": "km je Teilstrecke einfache Richtung, verkehrsübliche (kürzeste) Strecke laut Google Maps."
+}

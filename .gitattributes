@@ -1,0 +1,7 @@
+# Quelltext einheitlich mit LF
+* text=auto eol=lf
+# Formulare und Bilder unverändert speichern (keine Zeilenende-Umwandlung); spätere Zeilen haben Vorrang
+*.pdf binary
+*.png binary
+*.apk binary
+*.keystore binary

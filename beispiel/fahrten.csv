@@ -1,0 +1,7 @@
+datum;route;unterricht_von;unterricht_bis;abfahrt;anlass;veranstaltung_von;veranstaltung_bis;ankunft;verkehrsmittel;grund;begruendung;fahrkarte_eur;sonstige_eur;notiz;abgerechnet_am
+02.09.2026;Wohnung > Seminar > Wohnung;;;13:15;a;14:00;17:15;18:00;;;;;;Beispiel 1;
+09.09.2026;Wohnung > Schule > Seminar > Wohnung;07:45;12:15;12:30;a;14:00;17:15;18:00;pkw;G2;Unterricht bis 12:15, Seminar ab 14:00, mit ÖPNV nicht rechtzeitig;;;Beispiel 3;
+16.09.2026;Wohnung > BBS Nord > Seminar > Wohnung;;;07:00;a;08:00;16:30;17:15;pkw;;;;3,50;Beispiel 4, Parken;
+23.09.2026;Wohnung > Seminar > Wohnung;;;13:00;a;14:00;17:15;18:15;oepnv;;;12,40;;mit Bus;
+30.09.2026;Wohnung > BBS Nord > Wohnung;;;07:15;d;08:00;13:00;14:00;pkw;;;;;Hospitation;
+07.10.2026;Wohnung > Schule > Wohnung;07:45;13:00;;;;;;;;;;;nicht abrechenbar (Beispiel 5);
