@@ -48,7 +48,8 @@ p { margin: 6px 0; }
 .klein { font-size: .85rem; color: var(--muted); }
 .teilen { display: inline-block; width: 1.05em; height: 1.05em; vertical-align: -0.15em; }
 footer { font-size: .8rem; color: var(--muted); }
-footer a { color: inherit; }
+footer .impressum { display: block; margin-top: 10px; font-size: .9rem; font-weight: 700; }
+footer .impressum a { color: var(--accent); }
 </style>
 </head>
 <body>
@@ -112,7 +113,7 @@ footer a { color: inherit; }
 
   <footer>Version /*VERSION*/ · Ausfüllhilfe nach dem Leitfaden Reisekosten im Vorbereitungsdienst (RLSB, Stand 01.01.2025).
     Festgesetzt wird die Erstattung vom RLSB. Vor dem Abgeben bitte die PDF gegenlesen.
-    · <a href="impressum.html">Impressum</a></footer>
+    <span class="impressum"><a href="impressum.html">Impressum</a></span></footer>
 </main>
 <script>
 // Auf iPhone/iPad die passende Anleitung zuerst zeigen und hervorheben, auf Android die Android-Karte
