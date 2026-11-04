@@ -863,7 +863,7 @@ nav.tabs button[aria-current="page"] { color: var(--accent); }
 <script>
 "use strict";
 const K = window.Kern;
-const APP_VERSION = "3.2";
+const APP_VERSION = "3.3";
 const TYPEN = { wohnung: "Wohnung", ausbildungsschule: "Ausbildungsschule", seminar: "Studienseminar", sonstiges: "Sonstiger Ort" };
 const MITTEL = { pkw: "Pkw", mitfahrt: "Mitfahrt", oepnv: "Bus/Bahn", fahrrad: "Fahrrad" };
 
@@ -1112,7 +1112,7 @@ function hookFahrten() {
 
 function viewWillkommen() {
   return `<div class="stack"><h1>Fahrtkosten Planer Studienseminar BBS OS</h1>${beispielBanner()}
-    <p>Trag deine Seminarfahrten ein, wann immer du unterwegs bist. Am Monatsende erstellt die App daraus den ausgefüllten Antrag 035_002 und die Anlage 035_016 als PDF.</p>
+    <p>Trag deine Seminarfahrten ein, wann immer du unterwegs bist. Wann immer du abrechnen willst, erstellt die App daraus den ausgefüllten Antrag 035_002 und die Anlage 035_016 als PDF.</p>
     <div class="card stack"><h3>So richtest du sie ein</h3>
       <ol class="steps"><li>Deine Angaben für das Formular eintragen (Name, Schule, IBAN).</li>
       <li>Deine Orte anlegen: Wohnung, Ausbildungsschule, Studienseminar.</li>
@@ -1672,7 +1672,7 @@ function viewEinstellungen() {
   </fieldset>
 
   <fieldset class="stack"><legend>Sicherung</legend>
-    <p class="small muted">${Store.mode === "db" ? "Deine Daten liegen privat in deinem Claude-Konto und sind auf Handy und PC gleich. Nur du siehst sie." : "Die Daten liegen nur in diesem Browser. Eine Sicherung schützt vor Verlust."}</p>
+    <p class="small muted">${Store.mode === "db" ? "Deine Daten liegen privat in deinem Claude-Konto und sind auf Handy und PC gleich. Nur du siehst sie." : "Die Daten liegen nur in diesem Browser auf diesem Gerät. Andere Geräte haben ihren eigenen Stand. Mit einer Sicherung überträgst du alles auf ein anderes Gerät: hier herunterladen, dort einspielen. Sie schützt auch vor Verlust."}</p>
     <div class="row"><button type="button" class="btn" id="export">Sicherung herunterladen</button>
     <label class="btn" for="import" style="flex-direction:row;color:var(--ink)">Sicherung einspielen<input type="file" id="import" accept="application/json,.json" hidden></label></div>
     ${sicherungen().length ? `<div class="stack" style="gap:6px"><span class="small muted" style="font-weight:700">Automatische Sicherungen auf diesem Gerät</span>

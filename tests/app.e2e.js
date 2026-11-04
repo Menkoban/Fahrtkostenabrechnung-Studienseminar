@@ -234,7 +234,7 @@ async function main() {
   assert.equal(android_dateien[0].mime, "application/pdf");
   assert.ok(android_dateien[0].laenge > 100000);
   await p2.click("#tab-einstellungen");
-  assert.match(await p2.locator("text=Version").last().textContent(), /Version 3\.2 \(Android\)/);
+  assert.match(await p2.locator("text=Version").last().textContent(), /Version 3\.3 \(Android\)/);
   assert.equal(await p2.locator('a[href="impressum.html"]').count(), 0);   // Impressum nur auf der Webseite
 
   // ---------- Breiter Bildschirm (PC)

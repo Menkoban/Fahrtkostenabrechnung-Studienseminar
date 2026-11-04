@@ -5,7 +5,7 @@ Studienseminare) automatisch aus – nach dem Leitfaden des RLSB, Stand 01.01.20
 
 ## App (Handy und PC)
 
-Alle Wege mit demselben Stand (Version 3.2). Auf dem Home-Bildschirm heißt die App kurz „Fahrtkosten“.
+Alle Wege mit demselben Stand (Version 3.3). Auf dem Home-Bildschirm heißt die App kurz „Fahrtkosten“.
 Logo „Fahrschein“: Quelle in `android/symbol.js` (`node android/symbol.js` erzeugt alle Symbolgrößen und `app/symbol.png`).
 
 | Datei | Für | Daten liegen |

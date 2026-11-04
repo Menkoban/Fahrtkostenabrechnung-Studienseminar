@@ -20,7 +20,7 @@ BASIS = Path(__file__).resolve().parent.parent
 APP = BASIS / "app"
 BIBLIOTHEKEN = BASIS / "android" / "bibliotheken"
 PDF_LIB_CDN = '<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>'
-VERSION = "3.2"
+VERSION = "3.3"
 NAME = "Fahrtkosten Planer Studienseminar BBS OS"
 KURZNAME = "Fahrtkosten"   # unter dem Symbol auf dem Home-Bildschirm (dort passen nur etwa 11 Zeichen)
 # Impressum der Webseite (§ 18 Abs. 1 Medienstaatsvertrag: Name und Anschrift)
