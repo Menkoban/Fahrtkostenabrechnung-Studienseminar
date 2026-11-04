@@ -19,7 +19,6 @@ import zipfile
 from datetime import datetime
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
 
 BASIS = Path(__file__).resolve().parent.parent
 ANDROID = BASIS / "android"
@@ -62,29 +61,12 @@ def assets():
     return ziel
 
 
-SCHRIFT = next((s for s in (r"C:\Windows\Fonts\arialbd.ttf", "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
-                            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf") if Path(s).exists()), None)
-
-
 def symbol():
-    """Startsymbol: Anthrazit mit rotem Block und weißem Euro-Zeichen (Farben des Studienseminars)."""
-    groessen = {"mdpi": 48, "hdpi": 72, "xhdpi": 96, "xxhdpi": 144, "xxxhdpi": 192}
-    # Die Symbole liegen im Repo; nur neu zeichnen, wenn eines fehlt (sonst ändert jede Schrift das Bild)
-    if all((ANDROID / "res" / f"mipmap-{d}" / "ic_launcher.png").exists() for d in groessen):
-        return
-    if not SCHRIFT:
-        raise SystemExit("Startsymbole fehlen und keine passende Schrift gefunden")
-    for dichte, px in groessen.items():
-        gross = px * 4
-        bild = Image.new("RGBA", (gross, gross), (0, 0, 0, 0))
-        z = ImageDraw.Draw(bild)
-        z.rounded_rectangle([0, 0, gross - 1, gross - 1], radius=gross // 5, fill=(55, 55, 54, 255))
-        z.rectangle([gross * 0.18, gross * 0.22, gross * 0.30, gross * 0.78], fill=(228, 1, 58, 255))
-        schrift = ImageFont.truetype(SCHRIFT, int(gross * 0.5))
-        z.text((gross * 0.62, gross * 0.5), "€", font=schrift, fill=(255, 255, 255, 255), anchor="mm")
-        ordner = ANDROID / "res" / f"mipmap-{dichte}"
-        ordner.mkdir(parents=True, exist_ok=True)
-        bild.resize((px, px), Image.LANCZOS).save(ordner / "ic_launcher.png")
+    """Startsymbole liegen im Repo (erzeugt mit node android/symbol.js aus dem Logo „Fahrschein“)."""
+    fehlend = [str(p) for p in (ANDROID / "res" / f"mipmap-{d}" / n for d in ("mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi")
+               for n in ("ic_launcher.png", "ic_launcher_vordergrund.png")) if not p.exists()]
+    if fehlend:
+        raise SystemExit("Startsymbole fehlen – zuerst node android/symbol.js ausführen:\n" + "\n".join(fehlend))
 
 
 def schluessel():

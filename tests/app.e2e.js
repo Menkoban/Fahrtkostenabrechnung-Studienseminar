@@ -49,7 +49,7 @@ async function main() {
 
   // ---------- Start
   await page.goto(APP);
-  await page.getByRole("heading", { name: "Fahrtkosten Vorbereitungsdienst" }).waitFor();
+  await page.getByRole("heading", { name: "Fahrtkosten Planer Studienseminar BBS OS" }).waitFor();
   await foto(page, "start");
   await ohneQuerscrollen(page, "Start");
 
@@ -234,7 +234,7 @@ async function main() {
   assert.equal(android_dateien[0].mime, "application/pdf");
   assert.ok(android_dateien[0].laenge > 100000);
   await p2.click("#tab-einstellungen");
-  assert.match(await p2.locator("text=Version").last().textContent(), /Version 3\.0 \(Android\)/);
+  assert.match(await p2.locator("text=Version").last().textContent(), /Version 3\.1 \(Android\)/);
 
   // ---------- Breiter Bildschirm (PC)
   await page.setViewportSize({ width: 1280, height: 900 });

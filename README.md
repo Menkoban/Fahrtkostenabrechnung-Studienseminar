@@ -1,11 +1,12 @@
-# Fahrtkostenabrechnung Vorbereitungsdienst
+# Fahrtkosten Planer Studienseminar BBS OS
 
 Füllt die Formulare **035_002** (Antrag auf Reisekostenvergütung) und **035_016** (Anlage für
 Studienseminare) automatisch aus – nach dem Leitfaden des RLSB, Stand 01.01.2025.
 
 ## App (Handy und PC)
 
-Drei Wege, alle mit demselben Stand (Version 3.0):
+Drei Wege, alle mit demselben Stand (Version 3.1). Auf dem Home-Bildschirm heißt die App kurz „Fahrtkosten“.
+Logo „Fahrschein“: Quelle in `android/symbol.js` (`node android/symbol.js` erzeugt alle Symbolgrößen und `app/symbol.png`).
 
 | Datei | Für | Daten liegen |
 |---|---|---|

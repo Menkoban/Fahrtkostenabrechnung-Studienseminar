@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>Fahrtkosten-App – Anleitung</title>
+<title>Fahrtkosten Planer Studienseminar BBS OS – Anleitung</title>
 <!-- Quelle der Anleitung. PDF erzeugen: node docs/anleitung-pdf.js -->
 <style>
 @page { size: A4; margin: 12mm 14mm 11mm; }
@@ -10,7 +10,7 @@
 * { box-sizing: border-box; }
 body { margin: 0; font-family: "DejaVu Sans", "Segoe UI", Arial, sans-serif; font-size: 9.2pt; line-height: 1.36; color: var(--text); }
 header { display: flex; align-items: center; gap: 12px; background: var(--anthrazit); color: #fff; padding: 12px 16px; border-radius: 6px; }
-header .marke { width: 12px; height: 36px; background: var(--rot); flex: none; }
+header .logo { width: 44px; height: 44px; flex: none; }
 header h1 { margin: 0; font-size: 17pt; line-height: 1.1; }
 header p { margin: 2px 0 0; font-size: 9pt; opacity: .8; }
 h2 { font-size: 11pt; margin: 11px 0 4px; padding-bottom: 3px; border-bottom: 2px solid var(--rot); break-after: avoid; }
@@ -31,8 +31,8 @@ b.knopf { background: var(--rot); color: #fff; padding: 0 5px; border-radius: 3p
 </head>
 <body>
 
-<header><span class="marke"></span><div>
-  <h1>Fahrtkosten-App für den Vorbereitungsdienst</h1>
+<header><img class="logo" src="../app/symbol.png" alt=""><div>
+  <h1>Fahrtkosten Planer Studienseminar BBS OS</h1>
   <p>Seminar- und Ausbildungsfahrten erfassen, Antrag 035_002 und Anlage 035_016 als fertiges PDF erzeugen</p>
 </div></header>
 
@@ -49,7 +49,7 @@ die 23 Ausbildungsschulen des Studienseminars Osnabrück BBS und die Adresse des
   <div class="kasten"><h3>Android-Handy</h3>
     <ol><li>Datei <b>Fahrtkosten.apk</b> auf dem Handy öffnen.</li>
     <li>Wenn Android fragt: „Installation aus dieser Quelle zulassen“ erlauben.</li>
-    <li>Installieren, öffnen, fertig.</li></ol>
+    <li>Installieren, öffnen, fertig. Auf dem Startbildschirm heißt die App kurz „Fahrtkosten“.</li></ol>
     <p class="leise">Android 10 oder neuer. Läuft ohne Internet, braucht keine Berechtigungen. PDFs landen im Ordner <i>Download/Fahrtkosten</i>.</p></div>
   <div class="kasten"><h3>PC oder Laptop</h3>
     <ol><li>Datei <b>Fahrtkosten-App.html</b> speichern, z. B. in „Dokumente“.</li>
@@ -135,7 +135,7 @@ Die App zeigt auf der Startseite, wann die erste Frist endet, und warnt 30 Tage 
     der Betrag in der App ist eine Schätzung.</li>
   <li>Nicht abgedeckt: Auslandsreisen und mehr als zwei verschiedene km-Sätze in einem Antrag (dann wandert das Fahrrad automatisch in „sonstige Kosten“).</li>
 </ul>
-<p class="leise" style="margin-top:12px">Fahrtkosten-App Version 3.0 · Regeln nach dem Leitfaden Reisekosten im Vorbereitungsdienst (RLSB, Stand 01.01.2025) ·
+<p class="leise" style="margin-top:12px">Fahrtkosten Planer Studienseminar BBS OS, Version 3.1 · Regeln nach dem Leitfaden Reisekosten im Vorbereitungsdienst (RLSB, Stand 01.01.2025) ·
 Formulare 035_002 (11.2022) und 035_016 (11.2025)</p>
 </body>
 </html>

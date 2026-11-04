@@ -4,12 +4,13 @@
 
 
     <application
-        android:label="Fahrtkosten"
+        android:label="Fahrtkosten Planer Studienseminar BBS OS"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity
             android:name=".MainActivity"
+            android:label="Fahrtkosten"
             android:exported="true"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:windowSoftInputMode="adjustResize">

@@ -1,4 +1,4 @@
-<title>Fahrtkosten Vorbereitungsdienst</title>
+<title>Fahrtkosten Planer Studienseminar BBS OS</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -56,7 +56,7 @@ a { color: var(--accent); }
 .kopf { background: var(--strong); color: var(--strong-ink); padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 10px; }
 .kopf .in { max-width: 720px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
-.kopf .marke { width: 14px; height: 28px; background: var(--accent); flex: none; }
+.kopf .logo { width: 34px; height: 34px; flex: none; display: block; }
 .kopf b { font-family: var(--f-display); font-size: 1rem; letter-spacing: .01em; }
 .kopf span { font-size: .8rem; opacity: .75; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--strong); }
@@ -166,11 +166,11 @@ nav.tabs button[aria-current="page"] { color: var(--accent); }
 @media (prefers-reduced-motion: no-preference) { .toast { animation: hoch .2s ease-out; } @keyframes hoch { from { transform: translate(-50%, 8px); opacity: 0; } } }
 </style>
 
-<header class="kopf"><div class="in"><span class="marke" aria-hidden="true"></span>
-  <div><b>Fahrtkosten</b><br><span>Vorbereitungsdienst · Lehramt an BBS</span></div></div></header>
+<header class="kopf"><div class="in"><img class="logo" src="data:image/png;base64,/*SYMBOL*/" alt="">
+  <div><b>Fahrtkosten Planer</b><br><span>Studienseminar BBS OS · Vorbereitungsdienst</span></div></div></header>
 <div class="wrap" id="main" aria-live="polite">
   <div class="card stack" id="laden">
-    <h2>Fahrtkosten Vorbereitungsdienst</h2>
+    <h2>Fahrtkosten Planer Studienseminar BBS OS</h2>
     <p class="muted">Deine Fahrten werden geladen …</p>
   </div>
 </div>
@@ -440,7 +440,7 @@ function hookFahrten() {
 }
 
 function viewWillkommen() {
-  return `<div class="stack"><h1>Fahrtkosten Vorbereitungsdienst</h1>${beispielBanner()}
+  return `<div class="stack"><h1>Fahrtkosten Planer Studienseminar BBS OS</h1>${beispielBanner()}
     <p>Trag deine Seminarfahrten ein, wann immer du unterwegs bist. Am Monatsende erstellt die App daraus den ausgefüllten Antrag 035_002 und die Anlage 035_016 als PDF.</p>
     <div class="card stack"><h3>So richtest du sie ein</h3>
       <ol class="steps"><li>Deine Angaben für das Formular eintragen (Name, Schule, IBAN).</li>
@@ -1014,7 +1014,7 @@ function viewEinstellungen() {
     ${ui.bestaetigen === "alles" ? `<div class="row"><span class="grow">Wirklich alle Angaben und Fahrten löschen?</span><button type="button" class="btn danger" id="alles-ja">Alles löschen</button><button type="button" class="btn" id="alles-nein">Abbrechen</button></div>`
       : `<button type="button" class="btn ghost danger" id="alles" style="align-self:flex-start">Alle Daten löschen</button>`}
   </fieldset>
-  <p class="hint">Fahrtkosten-App Version ${APP_VERSION}${window.AndroidApp ? " (Android)" : ""}. Regeln nach dem Leitfaden Reisekosten im Vorbereitungsdienst des RLSB, Stand 01.01.2025. Die Festsetzung macht das RLSB.</p></div>`;
+  <p class="hint">Fahrtkosten Planer Studienseminar BBS OS, Version ${APP_VERSION}${window.AndroidApp ? " (Android)" : ""}. Regeln nach dem Leitfaden Reisekosten im Vorbereitungsdienst des RLSB, Stand 01.01.2025. Die Festsetzung macht das RLSB.</p></div>`;
 }
 
 // ---------- Profil: speichert sich selbst (kurz nach dem Tippen, beim Verlassen eines Feldes und vor jedem Neuzeichnen)
@@ -1132,7 +1132,7 @@ function hookEinstellungen() {
       if (!inhalt.docs || typeof inhalt.docs !== "object") throw new Error();
       for (const [id, doc] of Object.entries(inhalt.docs)) if (/^(profil|orte|f-[\w-]+)$/.test(id) && doc && typeof doc === "object") await Store.put(id, doc);
       toast("Sicherung eingespielt"); render();
-    } catch (err) { toast("Diese Datei ist keine Sicherung der Fahrtkosten-App"); }
+    } catch (err) { toast("Diese Datei ist keine Sicherung des Fahrtkosten Planers"); }
   });
   document.querySelectorAll("[data-sicherung]").forEach((b) => b.addEventListener("click", () => { ui.bestaetigen = "sicherung-" + b.dataset.sicherung; render(); }));
   const sn = $("#sicherung-nein"); if (sn) sn.addEventListener("click", () => { ui.bestaetigen = ""; render(); });

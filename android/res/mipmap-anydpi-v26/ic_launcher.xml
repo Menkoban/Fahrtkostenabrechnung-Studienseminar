@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Adaptives Symbol (Android 8+): Anthrazit-Hintergrund, Fahrschein im Vordergrund. Bilder: node android/symbol.js -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/symbol_hintergrund" />
+    <foreground android:drawable="@mipmap/ic_launcher_vordergrund" />
+</adaptive-icon>

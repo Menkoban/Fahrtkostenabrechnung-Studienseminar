@@ -17,7 +17,9 @@ BASIS = Path(__file__).resolve().parent.parent
 APP = BASIS / "app"
 BIBLIOTHEKEN = BASIS / "android" / "bibliotheken"
 PDF_LIB_CDN = '<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>'
-VERSION = "3.0"
+VERSION = "3.1"
+NAME = "Fahrtkosten Planer Studienseminar BBS OS"
+KURZNAME = "Fahrtkosten"   # unter dem Symbol auf dem Home-Bildschirm (dort passen nur etwa 11 Zeichen)
 
 
 def bibliothek(name):
@@ -35,6 +37,7 @@ def main():
         "/*PDF_ANTRAG*/": base64.b64encode((BASIS / "Reisekosten_Antrag_035_002.pdf").read_bytes()).decode(),
         "/*PDF_ANLAGE*/": base64.b64encode((BASIS / "Reisekosten_Anlage.pdf").read_bytes()).decode(),
         "/*VERSION*/": VERSION,
+        "/*SYMBOL*/": base64.b64encode((APP / "symbol.png").read_bytes()).decode(),
     }
     for marke, inhalt in teile.items():
         if html.count(marke) != 1:
@@ -57,7 +60,7 @@ def main():
     if "cdnjs.cloudflare.com/ajax/libs/pdf-lib" in offline or "fonts.googleapis" in offline:
         raise SystemExit("Offline-Version verweist noch auf einen Server")
 
-    symbol = base64.b64encode((BASIS / "android" / "res" / "mipmap-xxxhdpi" / "ic_launcher.png").read_bytes()).decode()
+    symbol = teile["/*SYMBOL*/"]
     ziel = BASIS / "Fahrtkosten-App.html"
     ziel.write_text(
         '<!doctype html><html lang="de"><head><meta charset="utf-8">'
@@ -65,7 +68,7 @@ def main():
         '<meta name="theme-color" content="#373736">'
         # iPhone/iPad: „Zum Home-Bildschirm“ zeigt die App dann ohne Browserleiste und mit eigenem Symbol
         '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">'
-        '<meta name="apple-mobile-web-app-title" content="Fahrtkosten">'
+        f'<meta name="apple-mobile-web-app-title" content="{KURZNAME}"><meta name="application-name" content="{NAME}">'
         '<meta name="apple-mobile-web-app-status-bar-style" content="black">'
         f'<link rel="icon" type="image/png" href="data:image/png;base64,{symbol}">'
         f'<link rel="apple-touch-icon" href="data:image/png;base64,{symbol}">'
