@@ -7,19 +7,25 @@ Ergebnis:
                                     der Android-App. Alle Bibliotheken sind eingebettet, keine Verbindung zu
                                     Google oder anderen Servern.
   app/dist/fahrtkosten-artifact.html  für claude.ai: nur der Seiteninhalt, Bibliotheken und Schriften vom CDN
+  app/dist/web/                     die Webseite (GitHub Pages): Startseite, App mit Manifest und Service Worker
+                                    (offline, „Zum Home-Bildschirm“ auf iPhone/Android), APK und Anleitung
 """
 
 import base64
 import re
+import shutil
 from pathlib import Path
 
 BASIS = Path(__file__).resolve().parent.parent
 APP = BASIS / "app"
 BIBLIOTHEKEN = BASIS / "android" / "bibliotheken"
 PDF_LIB_CDN = '<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>'
-VERSION = "3.1"
+VERSION = "3.2"
 NAME = "Fahrtkosten Planer Studienseminar BBS OS"
-KURZNAME = "Fahrtkosten"   # unter dem Symbol auf dem Home-Bildschirm (dort passen nur etwa 11 Zeichen)
+KURZNAME = "Fahrtkosten"
+# Impressum der Webseite (§ 18 Abs. 1 Medienstaatsvertrag: Name und Anschrift)
+IMPRESSUM_NAME = ""   # bitte eintragen, ohne Namen bricht der Bau der Webseite ab
+IMPRESSUM_ANSCHRIFT = ["Sachsenring 9", "49733 Haren (Ems)"]   # unter dem Symbol auf dem Home-Bildschirm (dort passen nur etwa 11 Zeichen)
 
 
 def bibliothek(name):
@@ -60,22 +66,55 @@ def main():
     if "cdnjs.cloudflare.com/ajax/libs/pdf-lib" in offline or "fonts.googleapis" in offline:
         raise SystemExit("Offline-Version verweist noch auf einen Server")
 
-    symbol = teile["/*SYMBOL*/"]
+    symbol = f"data:image/png;base64,{teile['/*SYMBOL*/']}"
     ziel = BASIS / "Fahrtkosten-App.html"
-    ziel.write_text(
-        '<!doctype html><html lang="de"><head><meta charset="utf-8">'
-        '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
-        '<meta name="theme-color" content="#373736">'
-        # iPhone/iPad: „Zum Home-Bildschirm“ zeigt die App dann ohne Browserleiste und mit eigenem Symbol
-        '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">'
-        f'<meta name="apple-mobile-web-app-title" content="{KURZNAME}"><meta name="application-name" content="{NAME}">'
-        '<meta name="apple-mobile-web-app-status-bar-style" content="black">'
-        f'<link rel="icon" type="image/png" href="data:image/png;base64,{symbol}">'
-        f'<link rel="apple-touch-icon" href="data:image/png;base64,{symbol}">'
-        '<style>body{margin:0}[hidden]{display:none!important}</style></head><body>'
-        + offline + "</body></html>", encoding="utf-8")
-    for datei in (ziel, artifact):
+    ziel.write_text(seite(offline, symbol, symbol), encoding="utf-8")
+    web = webseite(offline)
+    for datei in (ziel, artifact, web / "app.html"):
         print(f"{datei.relative_to(BASIS)}: {datei.stat().st_size / 1024:.0f} KB")
+
+
+def seite(inhalt, icon, apple_icon, kopf_extra=""):
+    """Vollständige HTML-Seite um den App-Inhalt."""
+    return ('<!doctype html><html lang="de"><head><meta charset="utf-8">'
+            '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
+            '<meta name="theme-color" content="#373736">'
+            # iPhone/iPad: „Zum Home-Bildschirm“ zeigt die App dann ohne Browserleiste und mit eigenem Symbol
+            '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">'
+            f'<meta name="apple-mobile-web-app-title" content="{KURZNAME}"><meta name="application-name" content="{NAME}">'
+            '<meta name="apple-mobile-web-app-status-bar-style" content="black">'
+            f'<link rel="icon" type="image/png" href="{icon}"><link rel="apple-touch-icon" href="{apple_icon}">'
+            + kopf_extra +
+            '<style>body{margin:0}[hidden]{display:none!important}</style></head><body>'
+            + inhalt + "</body></html>")
+
+
+def webseite(offline):
+    """app/dist/web: was GitHub Pages ausliefert (.github/workflows/webseite.yml)."""
+    ziel = APP / "dist" / "web"
+    if ziel.exists():
+        shutil.rmtree(ziel)
+    ziel.mkdir(parents=True)
+    if not IMPRESSUM_NAME.strip():
+        raise SystemExit("IMPRESSUM_NAME in app/build.py fehlt – ohne Impressum wird die Webseite nicht gebaut")
+    ersetzen = {"/*VERSION*/": VERSION, "/*NAME*/": NAME, "/*KURZNAME*/": KURZNAME,
+                "/*IMPRESSUM*/": "<br>".join([IMPRESSUM_NAME, *IMPRESSUM_ANSCHRIFT])}
+    for datei in ("index.html", "impressum.html", "sw.js", "manifest.webmanifest"):
+        text = (BASIS / "web" / datei).read_text(encoding="utf-8")
+        for marke, wert in ersetzen.items():
+            text = text.replace(marke, wert)
+        (ziel / datei).write_text(text, encoding="utf-8")
+    for datei in ("symbol-512.png", "apple-touch-icon.png"):
+        shutil.copy(BASIS / "web" / datei, ziel / datei)
+    # iOS nimmt für den Home-Bildschirm kein data:-Bild, deshalb hier echte Dateien; das Manifest schaltet den Offline-Betrieb ein
+    (ziel / "app.html").write_text(seite(offline, "symbol-512.png", "apple-touch-icon.png",
+                                         '<link rel="manifest" href="manifest.webmanifest"><meta name="robots" content="noindex, nofollow">'),
+                                    encoding="utf-8")
+    # Downloads: dieselben Dateien wie im Repo
+    for datei in ("Fahrtkosten-App.html", "Fahrtkosten.apk", "Anleitung_Fahrtkosten-App.pdf"):
+        if (BASIS / datei).exists():
+            shutil.copy(BASIS / datei, ziel / datei)
+    return ziel
 
 
 if __name__ == "__main__":

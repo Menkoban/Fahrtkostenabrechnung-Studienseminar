@@ -863,7 +863,7 @@ nav.tabs button[aria-current="page"] { color: var(--accent); }
 <script>
 "use strict";
 const K = window.Kern;
-const APP_VERSION = "3.1";
+const APP_VERSION = "3.2";
 const TYPEN = { wohnung: "Wohnung", ausbildungsschule: "Ausbildungsschule", seminar: "Studienseminar", sonstiges: "Sonstiger Ort" };
 const MITTEL = { pkw: "Pkw", mitfahrt: "Mitfahrt", oepnv: "Bus/Bahn", fahrrad: "Fahrrad" };
 
@@ -1685,7 +1685,7 @@ function viewEinstellungen() {
     ${ui.bestaetigen === "alles" ? `<div class="row"><span class="grow">Wirklich alle Angaben und Fahrten löschen?</span><button type="button" class="btn danger" id="alles-ja">Alles löschen</button><button type="button" class="btn" id="alles-nein">Abbrechen</button></div>`
       : `<button type="button" class="btn ghost danger" id="alles" style="align-self:flex-start">Alle Daten löschen</button>`}
   </fieldset>
-  <p class="hint">Fahrtkosten Planer Studienseminar BBS OS, Version ${APP_VERSION}${window.AndroidApp ? " (Android)" : ""}. Regeln nach dem Leitfaden Reisekosten im Vorbereitungsdienst des RLSB, Stand 01.01.2025. Die Festsetzung macht das RLSB.</p></div>`;
+  <p class="hint">Fahrtkosten Planer Studienseminar BBS OS, Version ${APP_VERSION}${window.AndroidApp ? " (Android)" : ""}. Regeln nach dem Leitfaden Reisekosten im Vorbereitungsdienst des RLSB, Stand 01.01.2025. Die Festsetzung macht das RLSB.${document.querySelector('link[rel="manifest"]') ? ' · <a href="impressum.html">Impressum</a>' : ""}</p></div>`;
 }
 
 // ---------- Profil: speichert sich selbst (kurz nach dem Tippen, beim Verlassen eines Feldes und vor jedem Neuzeichnen)
@@ -1870,6 +1870,11 @@ async function beispielLaden() {
 document.querySelectorAll("nav.tabs button").forEach((b) => b.addEventListener("click", () => { if (b.dataset.tab === "abrechnen") ui.abr = null; gehe(b.dataset.tab); }));
 Store.listeners.push(() => { if (ui.view === "fahrten" || ui.view === "abrechnen" || ui.fehler) render(); });
 Store.init();
+// Nur auf der Webseite (dort steht ein Manifest im Kopf): Offline-Betrieb und „Zum Home-Bildschirm“.
+// In der Datei, in der Android-App und auf claude.ai gibt es kein Manifest, dort passiert nichts.
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost") && document.querySelector('link[rel="manifest"]')) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
 </script>
 
 <script type="text/plain" id="lib-pdfjs">/**

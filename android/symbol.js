@@ -2,7 +2,8 @@
 //   node android/symbol.js
 // Ergebnis: android/res/mipmap-*/ic_launcher.png (klassisch, mit Hintergrund),
 //           android/res/mipmap-*/ic_launcher_vordergrund.png (adaptives Symbol ab Android 8),
-//           app/symbol.png (192 px, für die HTML: Browser-Tab und iPhone-Home-Bildschirm)
+//           app/symbol.png (192 px, für die HTML: Browser-Tab und iPhone-Home-Bildschirm),
+//           web/symbol-512.png und web/apple-touch-icon.png (Webseite)
 const { chromium } = require("playwright");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -40,6 +41,9 @@ async function png(seite, quelle, groesse, ziel) {
     await png(seite, VORDERGRUND, 108 * faktor, path.join(__dirname, "res", `mipmap-${dichte}`, "ic_launcher_vordergrund.png"));
   }
   await png(seite, SYMBOL, 192, path.join(BASIS, "app", "symbol.png"));
+  // Webseite: Symbol für Android/Chrome (512) und iPhone (180, ohne Transparenz, iOS rundet selbst ab)
+  await png(seite, SYMBOL, 512, path.join(BASIS, "web", "symbol-512.png"));
+  await png(seite, svg(`<rect width="512" height="512" fill="${ANTHRAZIT}"/>${TICKET}`), 180, path.join(BASIS, "web", "apple-touch-icon.png"));
   await browser.close();
   console.log("Symbole erzeugt");
 })();
