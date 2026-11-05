@@ -358,7 +358,7 @@ function gehe(view) {
 
 function eingerichtet() {
   const p = profil(), o = orte();
-  return !!(p && p.name && p.iban && o.orte.some((x) => x.typ === "wohnung") && o.orte.length >= 2);
+  return !!(p && p.name && o.orte.some((x) => x.typ === "wohnung") && o.orte.length >= 2);  // IBAN ist freiwillig
 }
 
 function render() {
@@ -443,7 +443,7 @@ function viewWillkommen() {
   return `<div class="stack"><h1>Fahrtkosten Planer Studienseminar BBS OS</h1>${beispielBanner()}
     <p>Trag deine Seminarfahrten ein, wann immer du unterwegs bist. Wann immer du abrechnen willst, erstellt die App daraus den ausgefüllten Antrag 035_002 und die Anlage 035_016 als PDF.</p>
     <div class="card stack"><h3>So richtest du sie ein</h3>
-      <ol class="steps"><li>Deine Angaben für das Formular eintragen (Name, Schule, IBAN).</li>
+      <ol class="steps"><li>Deine Angaben für das Formular eintragen (Name, Schule; IBAN freiwillig).</li>
       <li>Deine Orte anlegen: Wohnung, Ausbildungsschule, Studienseminar.</li>
       <li>Die Kilometer zwischen den Orten aus Google Maps übernehmen.</li></ol>
       <div class="row"><button class="btn primary" id="willkommen-start">Einrichten</button>
@@ -749,7 +749,7 @@ function viewAbrechnen() {
   abgerechnet.forEach((f) => { (gruppen[f.abgerechnetAm] = gruppen[f.abgerechnetAm] || []).push(f); });
   const p = profil();
   return `<div class="top"><h1>Abrechnen</h1></div><div class="stack">${beispielBanner()}
-    ${!eingerichtet() ? `<div class="banner warn">Bitte zuerst unter „Meine Daten“ Name, IBAN und Orte eintragen.</div>` : ""}
+    ${!eingerichtet() ? `<div class="banner warn">Bitte zuerst unter „Meine Daten“ Name und Orte eintragen.</div>` : ""}
     <div class="grid2"><label for="a-von">Fahrten vom<input type="date" id="a-von" value="${a.von}"></label>
       <label for="a-bis">bis<input type="date" id="a-bis" value="${a.bis}"></label></div>
     ${liste.length ? `<div class="list">${liste.map(({ f, r }) => `<div class="pick">
@@ -762,6 +762,10 @@ function viewAbrechnen() {
       <div class="muted small">${inhaltText(gewaehlt)}</div></div>
       <div class="betrag"><span class="eyebrow">Erstattung ca.</span><span class="num">${K.eur(summe)} €</span>
         <span class="small" style="opacity:.8">davon Tagegeld ${K.eur(gewaehlt.reduce((s, { r }) => s + r.tagegeld, 0))} €</span></div></div>
+    ${p && !p.iban ? `<fieldset class="stack"><legend>Bankverbindung für diesen Antrag</legend>
+      <div class="grid2"><label for="a-iban">IBAN<input id="a-iban" value="${esc(a.iban || "")}" autocomplete="off" spellcheck="false" placeholder="DE00 0000 …"></label>
+        <label for="a-bic">BIC<input id="a-bic" value="${esc(a.bic || "")}" autocomplete="off" spellcheck="false"></label></div>
+      <span class="hint" id="a-iban-hint">${ibanHinweis(a.iban)}</span></fieldset>` : ""}
     <button class="btn primary wide" id="pdf" ${gewaehlt.length && eingerichtet() ? "" : "disabled"}>Antrag und Anlage als PDF erstellen</button>
     <div id="pdf-status"></div>
     ${a.erstellt ? `<div class="stack"><h3>Erstellt: ${a.erstellt.out.seiten} Seiten</h3>
@@ -771,6 +775,7 @@ function viewAbrechnen() {
       <div class="vorschau" id="vorschau"><p class="muted small">Vorschau wird geladen …</p></div></div>
     <div class="card stack"><h3>Wie geht es weiter?</h3>
       <ol class="steps"><li>PDF ausdrucken und gegenlesen.</li><li>Antrag auf Seite 2 unterschreiben (mit Amtsbezeichnung und Datum).</li>
+      ${a.erstellt.ohneIban ? `<li><b>IBAN und BIC von Hand eintragen</b> (Antrag, Seite 1${a.erstellt.mehrtaegig ? ", in jedem Antrag" : ""}).</li>` : ""}
       ${a.erstellt.belege ? "<li>Fahrkarten, Parkbelege und Hotelrechnungen beilegen.</li>" : ""}
       ${a.erstellt.mehrtaegig ? "<li>Für mehrtägige Reisen die Genehmigung der Seminarleitung beilegen. Jeder Antrag in der PDF wird einzeln unterschrieben.</li>" : ""}<li>Beim Studienseminar abgeben. Der Eingangsstempel wahrt die 6-Monats-Frist.</li></ol>
       ${ui.bestaetigen === "markieren" ? `<div class="row"><span class="grow">${a.erstellt.ids.length} Fahrten als abgerechnet markieren?</span><button class="btn primary" id="mark-ja">Ja, markieren</button><button class="btn" id="mark-nein">Abbrechen</button></div>`
@@ -779,6 +784,13 @@ function viewAbrechnen() {
       `<div class="pick"><span class="chip ok">✓</span><span>Abgegeben am <b>${K.deDatum(tag)}</b><br><span class="muted small">${fs.length} Fahrten, ${K.deDatum(fs.map((f) => f.datum).sort()[0]).slice(0, 6)} bis ${K.deDatum(fs.map((f) => f.datum).sort().pop())}</span></span>
        ${ui.bestaetigen === "zurueck-" + tag ? `<span class="row"><button class="btn danger" data-zurueck-ja="${tag}">Zurücksetzen</button><button class="btn" id="zurueck-nein">Nein</button></span>` : `<button class="btn ghost small" data-zurueck="${tag}">wieder öffnen</button>`}</div>`).join("")}</div></section>` : ""}
   </div>`;
+}
+
+/** IBAN nur für die nächste PDF: lebt im Arbeitsspeicher (ui.abr), wird nie gespeichert oder gesichert. */
+function ibanHinweis(iban) {
+  const roh = (iban || "").replace(/\s/g, "").toUpperCase();
+  if (roh && !ibanGueltig(roh)) return "Die IBAN scheint einen Tippfehler zu haben.";
+  return "Wird nur in diese PDF geschrieben und nirgends gespeichert. Leer lassen, wenn du sie von Hand in den Ausdruck schreibst.";
 }
 
 function inhaltText(gewaehlt) {
@@ -823,21 +835,27 @@ function hookAbrechnen() {
   $("#a-bis").addEventListener("change", (e) => { if (e.target.value) { a.bis = e.target.value; neu(); } });
   document.querySelectorAll("[data-pick]").forEach((c) => c.addEventListener("change", () => {
     c.checked ? a.aus.add(c.dataset.pick) : a.aus.delete(c.dataset.pick); a.erstellt = null; render(); }));
+  const einmal = (id, feld) => { const el = $(id); if (el) el.addEventListener("input", () => {
+    a[feld] = el.value.trim().toUpperCase(); a.erstellt = null; $("#a-iban-hint").textContent = ibanHinweis(a.iban); }); };
+  einmal("#a-iban", "iban"); einmal("#a-bic", "bic");
   $("#pdf").addEventListener("click", async () => {
     const status = $("#pdf-status");
+    // Gespeicherte Bankdaten gehen vor; sonst die nur für diese PDF eingegebenen (nicht gespeichert)
+    const p = profil();
+    const fuerPdf = { ...p, iban: p.iban || (a.iban || "").replace(/\s/g, ""), bic: p.bic || a.bic || "" };
     const gewaehlt = abrListe().filter(({ f, r }) => !r.fehler.length && a.aus.has(f.id));
     status.innerHTML = `<div class="banner info">PDF wird erstellt …</div>`;
     let out;
     try {
       if (!window.PDFLib) throw new Error("Die PDF-Bibliothek ist nicht geladen. Bitte mit Internetverbindung neu laden.");
-      out = await K.erzeugePdf(window.PDFLib, { profil: profil(), fahrten: gewaehlt, antragBytes: b64("#pdf-antrag"), anlageBytes: b64("#pdf-anlage") });
+      out = await K.erzeugePdf(window.PDFLib, { profil: fuerPdf, fahrten: gewaehlt, antragBytes: b64("#pdf-antrag"), anlageBytes: b64("#pdf-anlage") });
     } catch (err) {
       status.innerHTML = `<div class="banner bad">${esc(err.message || "PDF konnte nicht erstellt werden.")}</div>`;
       return;
     }
     const erste = gewaehlt[0].f.datum, letzte = gewaehlt.map(({ f }) => f.datumBis || f.datum).sort().pop();
     a.erstellt = { ids: gewaehlt.map(({ f }) => f.id), belege: gewaehlt.some(({ f }) => f.fahrkarte || f.sonstige || f.uebernachtung === "beleg"),
-      mehrtaegig: gewaehlt.some(({ r }) => r.mehrtaegig),
+      mehrtaegig: gewaehlt.some(({ r }) => r.mehrtaegig), ohneIban: !fuerPdf.iban,
       out, name: `Reisekosten_${K.deDatum(erste)}-${K.deDatum(letzte)}` };
     render();
     await speichereMitMeldung(`${a.erstellt.name}.pdf`, out.bytes, out.zuLang.length
@@ -956,7 +974,8 @@ function viewEinstellungen() {
     <div class="grid2">${feld("name", "Name, Vorname", p.name, 'placeholder="Mustermann, Max" autocomplete="name"')}${feld("amt", "Amtsbezeichnung", p.amtsbezeichnung, 'placeholder="StRef oder LiVD"')}</div>
     ${feld("adr", "Wohnanschrift", p.wohnanschrift, 'placeholder="Straße Nr., PLZ Ort" autocomplete="street-address"')}
     <div class="grid2">${feld("tel", "Telefon (freiwillig)", p.telefon, 'inputmode="tel"')}${feld("mail", "E-Mail (freiwillig)", p.email, 'inputmode="email"')}</div>
-    <div class="grid2">${feld("iban", "IBAN", p.iban, 'autocomplete="off" spellcheck="false"')}${feld("bic", "BIC", p.bic, 'autocomplete="off" spellcheck="false"')}</div>
+    <div class="grid2">${feld("iban", "IBAN (freiwillig)", p.iban, 'autocomplete="off" spellcheck="false"')}${feld("bic", "BIC (freiwillig)", p.bic, 'autocomplete="off" spellcheck="false"')}</div>
+    <span class="hint">Du musst deine Bankdaten nicht speichern. Ohne gespeicherte IBAN fragt die App beim Erstellen der PDF danach und schreibt sie nur in diese PDF, oder du trägst sie von Hand im Ausdruck ein.</span>
     ${feld("besch", "Beschäftigungsstelle (Schule, Schul-Nr., Dienstort)", p.beschaeftigungsstelle)}
     ${feld("schule", "Schulname und Adresse (für die Anlage)", p.schule_name_adresse)}
     ${feld("rlsb", "Abrechnende Dienststelle", p.abrechnende_dienststelle, 'placeholder="z. B. RLSB Osnabrück, Dezernat 1"')}

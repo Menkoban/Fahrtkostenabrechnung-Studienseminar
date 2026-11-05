@@ -169,6 +169,13 @@ test("Formularwerte: Antrag mit zwei km-Sätzen, Anlage mit Dienstort", () => {
   assert.equal(w.Summe_Strecke, "145");
 });
 
+test("Ohne IBAN bleiben IBAN- und BIC-Felder im Antrag leer", () => {
+  const liste = [fahrt({})].map((f) => ({ f, r: K.berechne(f, ORTE, HEUTE) }));
+  const w = K.werteAntrag({ ...PROFIL, iban: "", bic: "" }, liste, 1);
+  assert.equal(Object.keys(w).filter((k) => /^IBAN\d+$/.test(k)).length, 0);
+  assert.ok(!w.Kreditinstitut);
+});
+
 test("Pkw, G-Grund und Fahrrad: Fahrrad wandert in die sonstigen Kosten", () => {
   const liste = [fahrt({}), fahrt({ datum: "2026-10-14", grund: "G1", begruendung: "x" }), fahrt({ datum: "2026-10-21", verkehrsmittel: "fahrrad" })]
     .map((f) => ({ f, r: K.berechne(f, ORTE, HEUTE) }));
