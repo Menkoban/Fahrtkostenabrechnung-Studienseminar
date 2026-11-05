@@ -40,7 +40,7 @@ async function main() {
   await page.getByRole("heading", { name: "Fahrtkosten Planer Studienseminar BBS OS" }).waitFor();
   assert.equal(await page.locator(".karten .karte").first().getAttribute("id"), "iphone");   // iPhone-Anleitung zuerst
   assert.ok(await page.locator("#iphone").evaluate((el) => el.classList.contains("hervor")));
-  assert.match(await page.locator("footer").textContent(), /Version 3\.3/);
+  assert.match(await page.locator("footer").textContent(), /Version 3\.4/);
   await page.screenshot({ path: path.join(FOTOS, "web_start_iphone.png"), fullPage: true });
   const breit = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   assert.ok(breit <= 1, `Startseite ist ${breit}px zu breit`);

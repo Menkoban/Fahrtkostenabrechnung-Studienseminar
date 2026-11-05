@@ -17,6 +17,17 @@ function isoVor(tage) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
+const IBAN = "DE89370400440532013000", BIC = "COBADEFFXXX";
+
+/** Text einer PDF (ohne Leerraum) über PyMuPDF; null, wenn PyMuPDF fehlt. */
+function pdfText(datei) {
+  try {
+    const aus = require("node:child_process").execFileSync("python3", ["-c",
+      "import sys, pymupdf; print(''.join(p.get_text() for p in pymupdf.open(sys.argv[1])))", datei], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+    return aus.replace(/\s/g, "");
+  } catch (e) { return null; }
+}
+
 let schritt = 0;
 async function foto(page, name) {
   await page.screenshot({ path: path.join(FOTOS, `${String(++schritt).padStart(2, "0")}_${name}.png`), fullPage: true });
@@ -58,9 +69,8 @@ async function main() {
   await page.fill("#p-name", "Musterfrau, Erika");
   await page.fill("#p-amt", "StRef");
   await page.fill("#p-adr", "Lotter Straße 10, 49078 Osnabrück");
-  await page.fill("#p-iban", "DE89 3704 0044 0532 0130 00");
-  await page.fill("#p-bic", "COBADEFFXXX");
-  await page.locator("#p-bic").blur();
+  // IBAN und BIC bewusst NICHT speichern: sie sind freiwillig und kommen erst beim Abrechnen, nur für die PDF
+  await page.locator("#p-adr").blur();
   await page.waitForTimeout(800);
   await page.selectOption("#s-schule", { label: "Berufsbildende Schulen Brinkstraße Osnabrück" });
   await page.waitForSelector("#o-name-1");
@@ -170,10 +180,27 @@ async function main() {
   // ---------- Abrechnen
   await page.click("#tab-abrechnen");
   await page.waitForSelector("#pdf:not([disabled])");
+  // Ohne IBAN: PDF entsteht trotzdem, mit Hinweis zum Eintragen von Hand
+  const [ohne] = await Promise.all([page.waitForEvent("download"), page.click("#pdf")]);
+  const ohnePfad = path.join(FOTOS, "ohne-iban.pdf");
+  await ohne.saveAs(ohnePfad);
+  await page.waitForSelector("text=IBAN und BIC von Hand eintragen");
+  const ohneText = pdfText(ohnePfad);
+  if (ohneText !== null) assert.ok(!ohneText.includes(IBAN) && !ohneText.includes(BIC), "IBAN darf nicht in der PDF stehen");
+  // IBAN nur für diese PDF eintragen
+  await page.fill("#a-iban", "DE89 3704 0044 0532 0130 00");
+  await page.fill("#a-bic", "cobadeffxxx");
+  assert.match(await page.locator("#a-iban-hint").textContent(), /nirgends gespeichert/);
   const [download] = await Promise.all([page.waitForEvent("download"), page.click("#pdf")]);
   const pdfPfad = path.join(FOTOS, download.suggestedFilename());
   await download.saveAs(pdfPfad);
   assert.match(download.suggestedFilename(), /^Reisekosten_\d\d\.\d\d\.\d{4}-\d\d\.\d\d\.\d{4}\.pdf$/);
+  const mitText = pdfText(pdfPfad);
+  if (mitText !== null) assert.ok(mitText.includes(IBAN) && mitText.includes(BIC), "IBAN und BIC fehlen in der PDF");
+  assert.equal(await page.locator("text=IBAN und BIC von Hand eintragen").count(), 0);
+  // … und nirgends gespeichert: weder Daten noch Sicherungen oder Entwurf im Gerätespeicher
+  const speicher = await page.evaluate(() => Object.keys(localStorage).map((k) => localStorage.getItem(k)).join(" "));
+  assert.ok(!speicher.replace(/\s/g, "").includes(IBAN) && !speicher.includes(BIC), "IBAN wurde gespeichert");
   const pdf = await PDF_LIB.PDFDocument.load(fs.readFileSync(pdfPfad));
   assert.equal(pdf.getPageCount(), 5);   // Antrag (2) + Anlage (1) + Antrag Kompaktseminar (2)
   await page.waitForSelector("#vorschau canvas");
@@ -197,6 +224,7 @@ async function main() {
   const sicherungPfad = path.join(FOTOS, sicherung.suggestedFilename());
   await sicherung.saveAs(sicherungPfad);
   const inhalt = JSON.parse(fs.readFileSync(sicherungPfad, "utf8"));
+  assert.ok(!JSON.stringify(inhalt).includes(BIC) && !JSON.stringify(inhalt).replace(/\s/g, "").includes(IBAN), "IBAN steht in der Sicherung");
   assert.equal(Object.keys(inhalt.docs).filter((k) => k.startsWith("f-")).length, 4);
   await page.reload();
   await page.waitForSelector(".item");
@@ -234,7 +262,7 @@ async function main() {
   assert.equal(android_dateien[0].mime, "application/pdf");
   assert.ok(android_dateien[0].laenge > 100000);
   await p2.click("#tab-einstellungen");
-  assert.match(await p2.locator("text=Version").last().textContent(), /Version 3\.3 \(Android\)/);
+  assert.match(await p2.locator("text=Version").last().textContent(), /Version 3\.4 \(Android\)/);
   assert.equal(await p2.locator('a[href="impressum.html"]').count(), 0);   // Impressum nur auf der Webseite
 
   // ---------- Breiter Bildschirm (PC)
