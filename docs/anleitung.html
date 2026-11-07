@@ -2,142 +2,80 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>Fahrtkosten Planer Studienseminar BBS OS – Anleitung</title>
-<!-- Quelle der Anleitung. PDF erzeugen: node docs/anleitung-pdf.js -->
+<title>Fahrtkosten Planer – Anleitung</title>
+<!-- Quelle der Anleitung (eine Seite). PDF erzeugen: node docs/anleitung-pdf.js -->
 <style>
-@page { size: A4; margin: 11mm 14mm 10mm; }
+@page { size: A4; margin: 12mm 14mm; }
 :root { --rot: #e4013a; --anthrazit: #373736; --grau: #f0f0ef; --linie: #d6d6d3; --text: #232322; --leise: #5f5f61; }
 * { box-sizing: border-box; }
-body { margin: 0; font-family: "DejaVu Sans", "Segoe UI", Arial, sans-serif; font-size: 9.1pt; line-height: 1.34; color: var(--text); }
-header { display: flex; align-items: center; gap: 12px; background: var(--anthrazit); color: #fff; padding: 12px 16px; border-radius: 6px; }
-header .logo { width: 44px; height: 44px; flex: none; }
+body { margin: 0; font-family: "DejaVu Sans", "Segoe UI", Arial, sans-serif; font-size: 10pt; line-height: 1.4; color: var(--text); }
+header { display: flex; align-items: center; gap: 12px; background: var(--anthrazit); color: #fff; padding: 12px 16px; border-radius: 8px; }
+header img { width: 46px; height: 46px; flex: none; }
 header h1 { margin: 0; font-size: 17pt; line-height: 1.1; }
-header p { margin: 2px 0 0; font-size: 9pt; opacity: .8; }
-h2 { font-size: 11pt; margin: 11px 0 4px; padding-bottom: 3px; border-bottom: 2px solid var(--rot); break-after: avoid; }
-h3 { font-size: 10pt; margin: 8px 0 3px; break-after: avoid; }
-p { margin: 4px 0; }
-ul, ol { margin: 4px 0; padding-left: 18px; }
-li { margin: 2px 0; }
-.spalten { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 6px; }
-.kasten { background: var(--grau); border-radius: 6px; padding: 8px 10px; break-inside: avoid; }
-.kasten h3 { margin-top: 0; }
-.wichtig { border-left: 4px solid var(--rot); background: #fde5ea; padding: 6px 10px; border-radius: 0 6px 6px 0; margin: 8px 0; break-inside: avoid; }
-table { width: 100%; border-collapse: collapse; margin: 4px 0; font-size: 9pt; }
-td, th { text-align: left; padding: 3px 6px; border-bottom: 1px solid var(--linie); vertical-align: top; }
-th { background: var(--grau); }
-.leise { color: var(--leise); font-size: 8.4pt; }
-b.knopf { background: var(--rot); color: #fff; padding: 0 5px; border-radius: 3px; font-weight: 700; white-space: nowrap; }
+header p { margin: 3px 0 0; font-size: 9.5pt; opacity: .8; }
+.oben { display: grid; grid-template-columns: 1fr 150px; gap: 16px; align-items: center; margin: 14px 0 6px; }
+.oben p { margin: 0 0 6px; }
+.adresse { font-weight: 700; font-size: 10.5pt; word-break: break-all; }
+.qr { text-align: center; font-size: 8pt; color: var(--leise); }
+.qr img { width: 150px; height: 150px; display: block; }
+h2 { font-size: 12pt; margin: 14px 0 6px; padding-bottom: 3px; border-bottom: 2px solid var(--rot); }
+.geraete { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.kasten { background: var(--grau); border-radius: 8px; padding: 8px 10px; }
+.kasten b.titel { display: block; margin-bottom: 3px; }
+.schritte { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; counter-reset: s; }
+.schritte li { display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: start; counter-increment: s; }
+.schritte li::before { content: counter(s); width: 30px; height: 30px; border-radius: 50%; background: var(--rot); color: #fff;
+  font-weight: 700; display: grid; place-items: center; font-size: 12pt; }
+.schritte b.titel { display: block; }
+.wichtig { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+.wichtig .kasten { border-left: 4px solid var(--rot); border-radius: 0 8px 8px 0; }
+footer { margin-top: 14px; font-size: 8pt; color: var(--leise); }
 </style>
 </head>
 <body>
-
-<header><img class="logo" src="../app/symbol.png" alt=""><div>
+<header><img src="../app/symbol.png" alt=""><div>
   <h1>Fahrtkosten Planer Studienseminar BBS OS</h1>
-  <p>Seminar- und Ausbildungsfahrten erfassen, Antrag 035_002 und Anlage 035_016 als fertiges PDF erzeugen</p>
+  <p>Anleitung · Fahrten eintragen, Antrag 035_002 und Anlage 035_016 als fertiges PDF</p>
 </div></header>
 
-<h2>Worum es geht</h2>
-<p>Als Lehrkraft im Vorbereitungsdienst bekommst du Fahrten zum Studienseminar, zu Hospitationen und zu anderen
-Ausbildungsveranstaltungen erstattet. Dafür füllst du den <b>Antrag 035_002</b> und die <b>Anlage 035_016 für Studienseminare</b> aus.
-Die App nimmt dir das ab: Du trägst nach jedem Seminartag kurz die Fahrt ein, und wann immer du abrechnen willst, erstellt sie beide Formulare
-fertig ausgefüllt als PDF. Du druckst nur noch aus, unterschreibst und gibst ab.</p>
-<p>Die App rechnet nach dem <b>Leitfaden Reisekosten im Vorbereitungsdienst des RLSB (Stand 01.01.2025)</b>. Sie kennt
-die 23 Ausbildungsschulen des Studienseminars Osnabrück BBS und die Adresse des Seminars.</p>
-
-<h2>Installieren</h2>
-<p>Alles gibt es auf der Webseite <b>menkoban.github.io/Fahrtkostenabrechnung-Studienseminar</b>: App, Android-Datei und diese Anleitung.</p>
-<div class="spalten">
-  <div class="kasten"><h3>Android-Handy</h3>
-    <ol><li>Auf der Webseite <b>„Android-App laden“</b> tippen (oder die Datei <b>Fahrtkosten.apk</b> öffnen).</li>
-    <li>Wenn Android fragt: „Installation aus dieser Quelle zulassen“ erlauben.</li>
-    <li>Installieren, öffnen, fertig. Auf dem Startbildschirm heißt die App kurz „Fahrtkosten“.</li></ol>
-    <p class="leise">Android 10 oder neuer. Läuft ohne Internet, braucht keine Berechtigungen. PDFs landen im Ordner <i>Download/Fahrtkosten</i>.</p></div>
-  <div class="kasten"><h3>PC oder Laptop</h3>
-    <ol><li>Auf der Webseite <b>„Im Browser öffnen“</b> oder <b>„Als Datei speichern“</b> wählen.</li>
-    <li>Die Datei <b>Fahrtkosten-App.html</b> öffnet sich per Doppelklick im Browser (Edge, Chrome, Firefox, Safari) und läuft ohne Internet.</li>
-    <li>Am besten immer denselben Weg im selben Browser nutzen.</li></ol>
-    <p class="leise">Die Daten liegen im Browser auf diesem PC. Nichts wird ins Internet geschickt.</p></div>
-  <div class="kasten"><h3>iPhone und iPad</h3>
-    <ol><li>Die Webseite in <b>Safari</b> öffnen und auf <b>„App öffnen“</b> tippen.</li>
-    <li>Teilen-Symbol → <b>„Zum Home-Bildschirm“</b>.</li>
-    <li>Ab jetzt über das Symbol „Fahrtkosten“ starten. Die App läuft dann auch ohne Internet.</li></ol>
-    <p class="leise">Immer über das Symbol starten: Nur dort bleiben die Daten dauerhaft gespeichert. Im normalen Safari-Tab kann iOS sie nach einigen Wochen ohne Nutzung löschen.</p></div>
+<div class="oben">
+  <div>
+    <p>Die App rechnet deine Seminar- und Ausbildungsfahrten nach dem Leitfaden des RLSB und füllt die Formulare aus.
+      Du druckst nur noch aus, unterschreibst und gibst ab. Kostenlos, ohne Konto, deine Daten bleiben auf deinem Gerät.</p>
+    <p>App, Android-Datei und diese Anleitung:</p>
+    <p class="adresse">menkoban.github.io/Fahrtkostenabrechnung-Studienseminar</p>
+  </div>
+  <div class="qr"><img src="qr-webseite.svg" alt="QR-Code zur Webseite">Mit dem Handy scannen</div>
 </div>
 
-<h2>Einmal einrichten (5 Minuten)</h2>
-<ol>
-  <li>Unten auf <b>Meine Daten</b> tippen. Unter „Schnell einrichten“ deine <b>Ausbildungsschule</b> aus der Liste wählen und
-    <b>Studienseminar Osnabrück BBS als Ort eintragen</b> antippen.</li>
-  <li>Name, Amtsbezeichnung (StRef / LiVD) und Wohnanschrift eintragen, bei „Beschäftigungsstelle“ die <b>Schul-Nr.</b> ergänzen.
-    Alles speichert sich selbst. <b>IBAN und BIC sind freiwillig</b> (siehe „Abrechnen“).</li>
-  <li>Bei „Meine Orte“ prüfen, ob die Adresse der Wohnung stimmt. Für Hospitationen kannst du weitere Schulen aus der Liste hinzufügen.</li>
-  <li>Unter „Entfernungen“ die <b>Kilometer der einfachen Strecke</b> eintragen. Der Link öffnet die Route in Google Maps,
-    der Leitfaden verlangt die kürzeste Strecke. Wohnung ↔ Ausbildungsschule zählt nie und muss nicht eingetragen werden.</li>
+<h2>Installieren</h2>
+<div class="geraete">
+  <div class="kasten"><b class="titel">iPhone / iPad</b>Webseite in Safari öffnen → „App öffnen“ → Teilen → „Zum Home-Bildschirm“.</div>
+  <div class="kasten"><b class="titel">Android</b>Auf der Webseite „Android-App laden“, Datei antippen und installieren.</div>
+  <div class="kasten"><b class="titel">PC / Mac</b>Auf der Webseite „Im Browser öffnen“ oder die Datei speichern und doppelklicken.</div>
+</div>
+
+<h2>In vier Schritten zum Antrag</h2>
+<ol class="schritte">
+  <li><div><b class="titel">Einmal einrichten</b>„Meine Daten“: Ausbildungsschule aus der Liste wählen, Studienseminar eintragen,
+    Name, Amtsbezeichnung und Anschrift ergänzen, km der einfachen Strecke eintragen. IBAN freiwillig.</div></li>
+  <li><div><b class="titel">Nach jedem Seminartag die Fahrt eintragen</b>„+ Neue Fahrt“: Route antippen (z. B. Wohnung → Seminar → Wohnung),
+    Uhrzeiten eintragen, speichern. Tagegeld, km und Pkw-Grund G1–G5 berechnet die App.</div></li>
+  <li><div><b class="titel">Abrechnen, wann du willst</b>„Abrechnen“ → „Antrag und Anlage als PDF erstellen“.
+    IBAN nur für diese PDF eintippen oder leer lassen und von Hand eintragen.</div></li>
+  <li><div><b class="titel">Ausdrucken, unterschreiben, abgeben</b>Belege beilegen, beim Studienseminar abgeben, danach in der App
+    „als abgerechnet markieren“.</div></li>
 </ol>
-<p class="leise">Zum Ausprobieren gibt es auf der Startseite „Mit Beispieldaten ausprobieren“. Die Beispieldaten lassen sich danach mit einem Knopf löschen.</p>
 
-<h2>Eine Fahrt eintragen</h2>
-<ol>
-  <li><b class="knopf">+ Neue Fahrt</b> antippen. Datum, Route und die letzten Uhrzeiten sind schon vorbelegt.</li>
-  <li><b>Route</b> in der gefahrenen Reihenfolge antippen, z. B. <i>Wohnung → Seminar → Wohnung</i> oder
-    <i>Wohnung → Schule → Seminar → Wohnung</i>, wenn du vorher unterrichtet hast. Hin- und Rückfahrt gehören in eine Fahrt.</li>
-  <li><b>Uhrzeiten</b>: Hinfahrt = wann du losgefahren bist, Rückfahrt = wann du wieder zu Hause warst, dazu Beginn und Ende der Veranstaltung.
-    Eigenen Unterricht an dem Tag nur eintragen, wenn es ihn gab.</li>
-  <li><b>Verkehrsmittel</b> wählen. Mit dem Pkw kannst du einen Grund G1–G5 für 0,38 €/km angeben. Bei G2 (Unterricht und Seminar am selben Tag)
-    schlägt die App eine Begründung aus deinen Uhrzeiten vor. Bei einer Fahrgemeinschaft trägst du die Mitfahrenden ein (G4).</li>
-  <li>Unten siehst du sofort den Betrag und Hinweise. <b class="knopf">Fahrt speichern</b>.</li>
-</ol>
-<p><b>Kompaktseminar mit Übernachtung:</b> Häkchen „Mehrtägige Reise“ setzen. Dann fragt die App nach Übernachtung (20 € pauschal oder Hotelrechnung),
-gestellten Mahlzeiten und der Genehmigung der Seminarleitung. Jede mehrtägige Reise bekommt einen eigenen Antrag.</p>
+<h2>Wichtig</h2>
+<div class="wichtig">
+  <div class="kasten"><b>6-Monats-Frist:</b> Der Antrag muss spätestens sechs Monate nach der Fahrt eingehen.
+    Die App zeigt, wann die erste Frist endet.</div>
+  <div class="kasten"><b>Ein Gerät, regelmäßig sichern:</b> Jedes Gerät speichert für sich. Unter „Meine Daten“ eine Sicherung
+    herunterladen, z. B. vor einem Handywechsel.</div>
+</div>
 
-<h2>Abrechnen</h2>
-<ol>
-  <li><b>Abrechnen</b> antippen. Zeitraum prüfen, alle offenen Fahrten sind vorausgewählt. Rot markierte Fahrten sind unvollständig
-    und werden erst nach dem Ergänzen aufgenommen.</li>
-  <li>IBAN nicht gespeichert? Dann hier <b>nur für diese PDF</b> eintragen oder leer lassen und von Hand eintragen.
-    <b class="knopf">Antrag und Anlage als PDF erstellen</b>: Die App speichert die PDF und zeigt eine Vorschau.</li>
-  <li>Ausdrucken, gegenlesen und den Antrag auf Seite 2 <b>unterschreiben</b> (mit Amtsbezeichnung und Datum).
-    Fahrkarten, Parkbelege und Hotelrechnungen beilegen.</li>
-  <li>Beim <b>Studienseminar abgeben</b>. Danach in der App <b>„Eingereicht: als abgerechnet markieren“</b> antippen,
-    damit die Fahrten nicht noch einmal auftauchen.</li>
-</ol>
-<div class="wichtig"><b>Frist:</b> Der Antrag muss innerhalb von <b>6 Monaten</b> nach der Fahrt eingehen, sonst verfällt der Anspruch.
-Die App zeigt auf der Startseite, wann die erste Frist endet, und warnt 30 Tage vorher.</div>
-
-<h2>Was die App für dich rechnet</h2>
-<table>
-  <tr><th style="width:34%">Regel</th><th>So macht es die App</th></tr>
-  <tr><td>Pkw ohne besonderen Grund</td><td>0,25 €/km, höchstens 125 € je Reise</td></tr>
-  <tr><td>Pkw mit Grund G1–G5</td><td>0,38 €/km, nur mit Begründung für genau diese Fahrt</td></tr>
-  <tr><td>Fahrrad / Bus und Bahn</td><td>0,10 €/km / Fahrpreis laut Beleg (Deutschlandticket: kein Betrag)</td></tr>
-  <tr><td>Mitfahrt in einer Fahrgemeinschaft</td><td>keine km, aber Tagegeld; die Person am Steuer wird genannt</td></tr>
-  <tr><td>Wohnung ↔ Ausbildungsschule</td><td>zählt nie (normaler Arbeitsweg); nach dem Unterricht beginnt die Fahrt am „Dienstort“</td></tr>
-  <tr><td>Tagegeld</td><td>14 € bei mehr als 8 Stunden unterwegs (automatisch, per Knopf änderbar); mehrtägig 14 € An- und Abreisetag, 28 € je vollem Tag</td></tr>
-  <tr><td>Übernachtung</td><td>20 € pauschal oder Hotel laut Rechnung (über 100 € je Nacht nur mit Begründung)</td></tr>
-  <tr><td>Strecke ab Ausbildungsschule</td><td>wahlweise: an Tagen ohne Unterricht die kürzere Strecke (Nr. 2.1.5 VV-NRKVO), nicht in der Einführungswoche</td></tr>
-  <tr><td>Prüfungen</td><td>fehlende Zeiten oder km, Daten in der Zukunft, abgelaufene Frist, doppelt eingetragene Tage, fehlende Rückfahrt</td></tr>
-  <tr><td>Mehr als 15 Fahrten</td><td>weitere Blätter der Anlage werden automatisch angelegt</td></tr>
-</table>
-
-<h2>Deine Daten</h2>
-<ul>
-  <li>Alles bleibt <b>auf deinem Gerät</b>. Die App schickt nichts ins Internet und lädt nichts nach.</li>
-  <li><b>Jedes Gerät hat seinen eigenen Stand</b> (Handy, PC, Tablet, jeder Browser für sich), ohne Abgleich. Am besten ein Gerät nutzen.</li>
-  <li>Unter „Meine Daten“ → <b>Sicherung herunterladen</b> bekommst du eine Datei mit allen Angaben und Fahrten. Mach das ab und zu,
-    vor allem vor einem Handywechsel. Mit „Sicherung einspielen“ holst du alles zurück, auch auf ein anderes Gerät (z. B. vom Handy auf den PC).</li>
-  <li>Die App legt zusätzlich automatisch bis zu fünf Sicherungen auf dem Gerät an.</li>
-  <li>Die Sicherungsdatei enthält deine Angaben (und die IBAN, falls gespeichert). Gib sie nicht weiter.</li>
-</ul>
-
-<h2>Gut zu wissen</h2>
-<ul>
-  <li>Die App ist eine Ausfüllhilfe. Festgesetzt wird die Reisekostenvergütung vom <b>RLSB</b>. Mit deiner Unterschrift versicherst du die Richtigkeit,
-    also die PDF vor dem Abgeben gegenlesen und keine Gründe angeben, die nicht stimmen.</li>
-  <li>Bei Kompaktseminaren trägt die App das Tagegeld ungekürzt in den Antrag ein und gibt die gestellten Mahlzeiten an. Die Kürzung nimmt das RLSB vor;
-    der Betrag in der App ist eine Schätzung.</li>
-  <li>Nicht abgedeckt: Auslandsreisen und mehr als zwei verschiedene km-Sätze in einem Antrag (dann wandert das Fahrrad automatisch in „sonstige Kosten“).</li>
-</ul>
-<p class="leise" style="margin-top:6px">Fahrtkosten Planer Studienseminar BBS OS, Version 3.4 · Regeln nach dem Leitfaden Reisekosten im Vorbereitungsdienst (RLSB, Stand 01.01.2025) ·
-Formulare 035_002 (11.2022) und 035_016 (11.2025)</p>
+<footer>Ausfüllhilfe nach dem Leitfaden Reisekosten im Vorbereitungsdienst (RLSB, Stand 01.01.2025). Festgesetzt wird die Erstattung
+  vom RLSB; die PDF vor dem Abgeben gegenlesen. Kein offizielles Angebot des Studienseminars oder des RLSB. Version 3.4.</footer>
 </body>
 </html>
