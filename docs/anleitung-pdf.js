@@ -1,4 +1,4 @@
-// Erzeugt Anleitung_Fahrtkosten-App.pdf (eine Seite, mit QR-Code zur Webseite) aus docs/anleitung.html.
+// Erzeugt Anleitung_Fahrtkosten-App.pdf aus docs/anleitung.html: Seite 1 Überblick mit QR-Code, danach alle Einzelheiten.
 //   node docs/anleitung-pdf.js
 const { chromium } = require("playwright");
 const path = require("node:path");
