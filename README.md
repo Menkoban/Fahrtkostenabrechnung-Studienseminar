@@ -15,8 +15,9 @@ Logo „Fahrschein“: Quelle in `android/symbol.js` (`node android/symbol.js` e
 | `Fahrtkosten-App.html` | PC (Doppelklick, läuft im Browser) und – unter einer Webadresse – iPhone/iPad über „Zum Home-Bildschirm“ | im Browser auf dem Gerät |
 | **https://claude.ai/artifact/Kvtvj73rsH6MEmVpN4TV5r** | eigene Nutzung mit Claude-Konto | im Claude-Konto, auf allen Geräten gleich |
 
-`Anleitung_Fahrtkosten-App.pdf` erklärt Installation und Bedienung für Referendarinnen und Referendare
-(Quelle: `docs/anleitung.html`, PDF neu erzeugen mit `node docs/anleitung-pdf.js`).
+`Kurzanleitung_Fahrtkosten-App.pdf` (eine Seite, mit QR-Code zur Webseite, Quelle `docs/kurzanleitung.html`) und
+`Anleitung_Fahrtkosten-App.pdf` erklären Installation und Bedienung für Referendarinnen und Referendare
+(Quelle: `docs/anleitung.html`, beide PDFs neu erzeugen mit `node docs/anleitung-pdf.js`).
 
 - `Fahrtkosten-App.html` und die APK sind **vollständig offline**: pdf-lib, pdf.js und die Formulare sind eingebettet,
   es gibt keine Webschriften und keine Verbindung zu Google oder anderen Servern. Nur die claude.ai-Version lädt

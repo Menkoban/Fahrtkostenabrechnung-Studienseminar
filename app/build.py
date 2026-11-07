@@ -111,7 +111,7 @@ def webseite(offline):
                                          '<link rel="manifest" href="manifest.webmanifest"><meta name="robots" content="noindex, nofollow">'),
                                     encoding="utf-8")
     # Downloads: dieselben Dateien wie im Repo
-    for datei in ("Fahrtkosten-App.html", "Fahrtkosten.apk", "Anleitung_Fahrtkosten-App.pdf"):
+    for datei in ("Fahrtkosten-App.html", "Fahrtkosten.apk", "Anleitung_Fahrtkosten-App.pdf", "Kurzanleitung_Fahrtkosten-App.pdf"):
         if (BASIS / datei).exists():
             shutil.copy(BASIS / datei, ziel / datei)
     return ziel
