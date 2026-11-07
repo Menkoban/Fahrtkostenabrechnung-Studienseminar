@@ -1,14 +1,11 @@
-// Erzeugt die beiden Anleitungen als PDF:   node docs/anleitung-pdf.js
-//   docs/anleitung.html     -> Anleitung_Fahrtkosten-App.pdf (zwei Seiten)
-//   docs/kurzanleitung.html -> Kurzanleitung_Fahrtkosten-App.pdf (eine Seite, mit QR-Code zur Webseite)
+// Erzeugt Anleitung_Fahrtkosten-App.pdf aus docs/anleitung.html: Seite 1 Überblick mit QR-Code, danach alle Einzelheiten.
+//   node docs/anleitung-pdf.js
 const { chromium } = require("playwright");
 const path = require("node:path");
 (async () => {
   const browser = await chromium.launch();
   const page = await browser.newPage();
-  for (const [quelle, ziel] of [["anleitung.html", "Anleitung_Fahrtkosten-App.pdf"], ["kurzanleitung.html", "Kurzanleitung_Fahrtkosten-App.pdf"]]) {
-    await page.goto("file://" + path.join(__dirname, quelle));
-    await page.pdf({ path: path.join(__dirname, "..", ziel), format: "A4", printBackground: true, preferCSSPageSize: true });
-  }
+  await page.goto("file://" + path.join(__dirname, "anleitung.html"));
+  await page.pdf({ path: path.join(__dirname, "..", "Anleitung_Fahrtkosten-App.pdf"), format: "A4", printBackground: true, preferCSSPageSize: true });
   await browser.close();
 })();
