@@ -197,7 +197,8 @@ const TYPEN = { wohnung: "Wohnung", ausbildungsschule: "Ausbildungsschule", semi
 const MITTEL = { pkw: "Pkw", mitfahrt: "Mitfahrt", oepnv: "Bus/Bahn", fahrrad: "Fahrrad" };
 
 // Ausbildungsschulen des Studienseminars Osnabrück für berufsbildende Schulen
-// (Quelle: studienseminar-os.de/unsere-ausbildungsschulen, abgerufen 04.11.2026)
+// (Quelle: studienseminar-os.de/unsere-ausbildungsschulen, abgerufen 04.11.2026; dazu die BBS II Leer,
+// die dort fehlt – Anschrift lt. Schulliste des Kultusministeriums Niedersachsen)
 // Die Adresse steht so in Spalte 5b der Anlage, deshalb mit „Studienseminar“ davor
 const SEMINAR_OS = { name: "Studienseminar Osnabrück für berufsbildende Schulen", adresse: "Studienseminar, Winkelhausenstraße 6, 49090 Osnabrück" };
 const SCHULEN_OS = [
@@ -205,6 +206,7 @@ const SCHULEN_OS = [
   ["BBS am Museumsdorf", "Berufsbildende Schulen am Museumsdorf Cloppenburg", "Museumstraße 14, 49661 Cloppenburg"],
   ["BBS Technik Cloppenburg", "Berufsbildende Schulen Technik Cloppenburg", "Lankumer Feldweg, 49661 Cloppenburg"],
   ["BBZ Diepholz", "Berufsbildungszentrum Dr. Jürgen Ulderup Diepholz", "Schlesierstraße 13, 49356 Diepholz"],
+  ["BBS II Leer", "Berufsbildende Schulen II Leer", "Blinke 39, 26789 Leer"],
   ["BBS Lingen Wirtschaft", "BBS Lingen Wirtschaft", "Nöldekestraße 7, 49809 Lingen"],
   ["BBS Lingen Technik", "Berufsbildende Schulen Lingen – Technik und Gestaltung", "Beckstraße 23, 49809 Lingen"],
   ["BBS Lingen Agrar", "Berufsbildende Schulen Lingen – Agrar und Soziales", "Beckstraße 23, 49809 Lingen"],
@@ -966,7 +968,8 @@ function viewEinstellungen() {
   <fieldset class="stack"><legend>Schnell einrichten</legend>
     <label for="s-schule">Meine Ausbildungsschule<select id="s-schule"><option value="">Schule aus der Liste wählen …</option>
       ${SCHULEN_OS.map((s, i) => `<option value="${i}" ${(p.schule_name_adresse || "").startsWith(s.name) ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></label>
-    <span class="hint">Die ${SCHULEN_OS.length} Ausbildungsschulen des Studienseminars Osnabrück BBS. Die Auswahl füllt Schulname, Adresse und den Ort „Schule“ aus. Die Schul-Nr. ergänzt du unten bei „Beschäftigungsstelle“.</span>
+    <span class="hint">Die ${SCHULEN_OS.length} Ausbildungsschulen des Studienseminars Osnabrück BBS. Die Auswahl füllt Schulname, Adresse und den Ort „Schule“ aus. Die Schul-Nr. ergänzt du unten bei „Beschäftigungsstelle“.
+      Deine Schule fehlt? Dann unten bei „Meine Orte“ mit „+ Ort hinzufügen“ einen Ort der Art „Ausbildungsschule“ anlegen und Schulname und Adresse oben bei „Für das Formular“ eintragen.</span>
     ${o.orte.some((x) => x.typ === "seminar" && x.adresse === SEMINAR_OS.adresse) ? `<span class="small" style="color:var(--good)">✓ Studienseminar Osnabrück BBS ist als Ort eingetragen.</span>`
       : `<button type="button" class="btn" id="s-seminar" style="align-self:flex-start">Studienseminar Osnabrück BBS als Ort eintragen</button>`}
   </fieldset>
