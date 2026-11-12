@@ -72,9 +72,10 @@ async function main() {
   // IBAN und BIC bewusst NICHT speichern: sie sind freiwillig und kommen erst beim Abrechnen, nur für die PDF
   await page.locator("#p-adr").blur();
   await page.waitForTimeout(800);
-  // Alle Ausbildungsschulen auswählbar, auch die BBS II Leer
-  assert.equal(await page.locator("#s-schule option").count(), 1 + 24);
+  // Alle Ausbildungsschulen auswählbar, auch BBS I Aurich und BBS II Leer
+  assert.equal(await page.locator("#s-schule option").count(), 1 + 25);
   assert.equal(await page.locator('#s-schule option', { hasText: "Berufsbildende Schulen II Leer" }).count(), 1);
+  assert.equal(await page.locator('#s-schule option', { hasText: "Berufsbildende Schulen I Aurich" }).count(), 1);
   await page.selectOption("#s-schule", { label: "Berufsbildende Schulen Brinkstraße Osnabrück" });
   await page.waitForSelector("#o-name-1");
   await page.click("#s-seminar");
@@ -265,7 +266,7 @@ async function main() {
   assert.equal(android_dateien[0].mime, "application/pdf");
   assert.ok(android_dateien[0].laenge > 100000);
   await p2.click("#tab-einstellungen");
-  assert.match(await p2.locator("text=Version").last().textContent(), /Version 3\.5 \(Android\)/);
+  assert.match(await p2.locator("text=Version").last().textContent(), /Version 3\.6 \(Android\)/);
   assert.equal(await p2.locator('a[href="impressum.html"]').count(), 0);   // Impressum nur auf der Webseite
 
   // ---------- Breiter Bildschirm (PC)
