@@ -191,6 +191,18 @@ async function main() {
   await page.waitForSelector("text=IBAN und BIC von Hand eintragen");
   const ohneText = pdfText(ohnePfad);
   if (ohneText !== null) assert.ok(!ohneText.includes(IBAN) && !ohneText.includes(BIC), "IBAN darf nicht in der PDF stehen");
+  // Grund der RKR: Vorschlag AFR, Abkürzung und Text lassen sich ändern
+  assert.equal(await page.inputValue("#a-rkr"), "AFR");
+  assert.match(await page.inputValue("#a-grund"), /Ausbildungsfahrten lt\. Anlage 035_016/);
+  await page.selectOption("#a-rkr", "DR");
+  await page.fill("#a-grund", "Fachtagung Hannover");
+  await page.click("#a-grund-auto");   // Vorschlag lässt sich wieder einsetzen, die Abkürzung bleibt
+  assert.match(await page.inputValue("#a-grund"), /Ausbildungsfahrten/);
+  assert.equal(await page.inputValue("#a-rkr"), "DR");
+  assert.ok(await page.locator("#a-grund-auto").isHidden());
+  await page.fill("#a-grund", "Fachtagung Hannover");
+  await page.fill("#a-noch", "Daten siehe Anlage");
+  assert.match(await page.locator("#a-grund-hint").textContent(), /DR, Fachtagung Hannover/);
   // IBAN nur für diese PDF eintragen
   await page.fill("#a-iban", "DE89 3704 0044 0532 0130 00");
   await page.fill("#a-bic", "cobadeffxxx");
@@ -201,6 +213,7 @@ async function main() {
   assert.match(download.suggestedFilename(), /^Reisekosten_\d\d\.\d\d\.\d{4}-\d\d\.\d\d\.\d{4}\.pdf$/);
   const mitText = pdfText(pdfPfad);
   if (mitText !== null) assert.ok(mitText.includes(IBAN) && mitText.includes(BIC), "IBAN und BIC fehlen in der PDF");
+  if (mitText !== null) assert.ok(mitText.includes("DR,FachtagungHannover") && mitText.includes("DatensieheAnlage"), "Eigener Grund der RKR fehlt in der PDF");
   assert.equal(await page.locator("text=IBAN und BIC von Hand eintragen").count(), 0);
   // … und nirgends gespeichert: weder Daten noch Sicherungen oder Entwurf im Gerätespeicher
   const speicher = await page.evaluate(() => Object.keys(localStorage).map((k) => localStorage.getItem(k)).join(" "));
@@ -266,7 +279,7 @@ async function main() {
   assert.equal(android_dateien[0].mime, "application/pdf");
   assert.ok(android_dateien[0].laenge > 100000);
   await p2.click("#tab-einstellungen");
-  assert.match(await p2.locator("text=Version").last().textContent(), /Version 3\.6 \(Android\)/);
+  assert.match(await p2.locator("text=Version").last().textContent(), /Version 3\.7 \(Android\)/);
   assert.equal(await p2.locator('a[href="impressum.html"]').count(), 0);   // Impressum nur auf der Webseite
 
   // ---------- Breiter Bildschirm (PC)

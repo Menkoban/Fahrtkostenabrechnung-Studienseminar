@@ -441,13 +441,29 @@
     return { w, mittel, belege: !!(fahrkarte || sonstige) };
   }
 
-  /** Sammelantrag für Tagesfahrten; Einzelheiten stehen in der Anlage 035_016. */
-  function werteAntrag(profil, fahrten, blaetter) {
-    const { w, mittel, belege } = basisAntrag(profil, fahrten);
+  // Abkürzungen für „Grund der RKR“ laut Formular 035_002 (leer = sonstige Reise, ohne Abkürzung erläutern)
+  const RKR_ARTEN = [["AFR", "Aus- u. Fortbildungsreise"], ["DR", "Dienstreise"], ["VR", "Vorstellungsreise"],
+    ["RPR", "Reise d. Personalrats"], ["RRS", "Reise in einer Rechtssache"], ["GNE", "Genehmigungsfreie Reise"],
+    ["", "Sonstige Reise (ohne Abkürzung erläutern)"]];
+
+  /** Vorschlag für „Grund der RKR“ und „noch Grund der RKR“ im Sammelantrag. */
+  function grundVorschlag(fahrten) {
     const daten = datenText(fahrten);
-    const grund = `AFR, Ausbildungsfahrten lt. Anlage 035_016: ${daten}`;
-    if (grund.length <= 75) w.Grund_der_RKR = grund;
-    else { w.Grund_der_RKR = "AFR, Ausbildungsfahrten lt. Anlage 035_016 (Daten s. Anlage)"; w.Grund_der_RKR1 = daten; }
+    const text = `Ausbildungsfahrten lt. Anlage 035_016: ${daten}`;
+    if (`AFR, ${text}`.length <= 75) return { kuerzel: "AFR", text, noch: "" };
+    return { kuerzel: "AFR", text: "Ausbildungsfahrten lt. Anlage 035_016 (Daten s. Anlage)", noch: daten };
+  }
+
+  function grundZeile(kuerzel, text) {
+    return [(kuerzel || "").trim(), (text || "").trim()].filter(Boolean).join(", ");
+  }
+
+  /** Sammelantrag für Tagesfahrten; Einzelheiten stehen in der Anlage 035_016. grund: eigene Angaben {kuerzel, text, noch}. */
+  function werteAntrag(profil, fahrten, blaetter, grund) {
+    const { w, mittel, belege } = basisAntrag(profil, fahrten);
+    const g = grund || grundVorschlag(fahrten);
+    w.Grund_der_RKR = grundZeile(g.kuerzel, g.text);
+    if ((g.noch || "").trim()) w.Grund_der_RKR1 = g.noch.trim();
 
     const siehe = "siehe Anlage 035_016";
     Object.assign(w, { Beginn_der_Dienstreise: siehe, Beginn_des_Dienstgeschaefts: siehe,
@@ -472,10 +488,10 @@
   }
 
   /** Eigener Antrag für eine mehrtägige Reise (z. B. Kompaktseminar): Zeiten, Tagegeld und Übernachtung direkt im Antrag. */
-  function werteAntragMehrtaegig(profil, { f, r }) {
+  function werteAntragMehrtaegig(profil, { f, r }, kuerzel = "AFR") {
     const { w, belege } = basisAntrag(profil, [{ f, r }]);
     const anlass = f.anlass === "d" ? f.anlassText : (f.kompakt ? "Kompaktseminar" : "Seminarveranstaltung");
-    w.Grund_der_RKR = `AFR, ${anlass}, ${deDatum(f.datum).slice(0, 6)}–${deDatum(f.datumBis)}`;
+    w.Grund_der_RKR = grundZeile(kuerzel, `${anlass}, ${deDatum(f.datum).slice(0, 6)}–${deDatum(f.datumBis)}`);
     if ((f.genehmigung || "").trim()) { w.OBJ3 = true; w.Dienststelle_Datum = f.genehmigung.trim(); }
     Object.assign(w, {
       Beginn_der_Dienstreise: `${deDatum(f.datum)}, ${f.abfahrt} Uhr`,
@@ -511,7 +527,7 @@
   const FELDNAMEN = {
     Begruendung_nein: "Begründung ohne Geschäftskundenrabatt", Strecke: "Ermäßigungskarte", Beschaeftigungsstelle: "Beschäftigungsstelle",
     Name__Vorname: "Name", Abrechnende_Dienststelle: "Abrechnende Dienststelle", Reiseziel_Reiseweg: "Reiseziel/Reiseweg",
-    Verpflegung: "Gestellte Mahlzeiten", Dienststelle_Datum: "Genehmigt durch", Grund_der_RKR: "Grund der Reise",
+    Verpflegung: "Gestellte Mahlzeiten", Dienststelle_Datum: "Genehmigt durch", Grund_der_RKR: "Grund der Reise", Grund_der_RKR1: "noch Grund der Reise",
     Name_Schule: "Schulname und Adresse", Adresse_Antragsteller: "Wohnanschrift", Seminarveranstaltung_in_Ort: "Ort der Veranstaltung",
     Begruendung: "Begründung G1–G5", Erlaeuterungen: "Erläuterungen", Wohnungsanschrift: "Wohnanschrift",
   };
@@ -610,7 +626,7 @@
    * Tagesfahrten: ein Antrag 035_002 + Anlage(n) 035_016. Jede mehrtägige Reise: ein eigener Antrag.
    * Liefert die Gesamtdatei und jedes Teil einzeln (zum getrennten Speichern und für die Vorschau).
    */
-  async function erzeugePdf(PDFLib, { profil, fahrten, antragBytes, anlageBytes }) {
+  async function erzeugePdf(PDFLib, { profil, fahrten, antragBytes, anlageBytes, grund }) {
     const sortiert = [...fahrten].sort((x, y) => (x.f.datum + x.f.abfahrt).localeCompare(y.f.datum + y.f.abfahrt));
     const tagesfahrten = sortiert.filter(({ r }) => !r.mehrtaegig);
     const mehrtaegig = sortiert.filter(({ r }) => r.mehrtaegig);
@@ -621,7 +637,7 @@
       const blaetter = [];
       for (let i = 0; i < tagesfahrten.length; i += ZEILEN_JE_ANLAGE) blaetter.push(tagesfahrten.slice(i, i + ZEILEN_JE_ANLAGE));
       teile.push({ art: "antrag", titel: `Antrag 035_002 für ${tagesfahrten.length} Tagesfahrt${tagesfahrten.length === 1 ? "" : "en"}`, dateiname: "Antrag_035_002",
-        docs: [await fuelle(PDFLib, antragBytes, werteAntrag(profil, tagesfahrten, blaetter.length), "Antrag", zuLang)] });
+        docs: [await fuelle(PDFLib, antragBytes, werteAntrag(profil, tagesfahrten, blaetter.length, grund), "Antrag", zuLang)] });
       const anlageDocs = [];
       for (let i = 0; i < blaetter.length; i++) {
         anlageDocs.push(await fuelle(PDFLib, anlageBytes, werteAnlage(profil, blaetter[i]), `Anlage Blatt ${i + 1}`, zuLang));
@@ -631,7 +647,7 @@
     for (const x of mehrtaegig) {
       teile.push({ art: "mehrtaegig", titel: `Antrag 035_002 für die Reise ${deDatum(x.f.datum).slice(0, 6)}–${deDatum(x.f.datumBis)}`,
         dateiname: `Antrag_035_002_${x.f.datum}_bis_${x.f.datumBis}`,
-        docs: [await fuelle(PDFLib, antragBytes, werteAntragMehrtaegig(profil, x), `Antrag ${deDatum(x.f.datum)}`, zuLang)] });
+        docs: [await fuelle(PDFLib, antragBytes, werteAntragMehrtaegig(profil, x, grund ? grund.kuerzel : "AFR"), `Antrag ${deDatum(x.f.datum)}`, zuLang)] });
     }
 
     let seite = 1;
@@ -652,7 +668,7 @@
 
   const Kern = { SATZ_KLEIN, SATZ_GROSS, SATZ_FAHRRAD, DECKEL_KLEIN, TAGEGELD, TAGEGELD_VOLL, GRUENDE,
     UEBERNACHTUNG_PAUSCHAL, UEBERNACHTUNG_GRENZE, UEBERNACHTUNG_KOMPAKT,
-    isoHeute, deDatum, fristEnde, berechne, istMehrtaegig, g2Vorschlag, g4Vorschlag, werteAntrag, werteAntragMehrtaegig, werteAnlage, erzeugePdf, eur, km };
+    isoHeute, deDatum, fristEnde, berechne, istMehrtaegig, g2Vorschlag, g4Vorschlag, RKR_ARTEN, grundVorschlag, werteAntrag, werteAntragMehrtaegig, werteAnlage, erzeugePdf, eur, km };
   if (typeof module !== "undefined" && module.exports) module.exports = Kern;
   else root.Kern = Kern;
 })(typeof globalThis !== "undefined" ? globalThis : this);
