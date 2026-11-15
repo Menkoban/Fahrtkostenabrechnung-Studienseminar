@@ -5,7 +5,7 @@ Studienseminare) automatisch aus – nach dem Leitfaden des RLSB, Stand 01.01.20
 
 ## App (Handy und PC)
 
-Alle Wege mit demselben Stand (Version 3.6). Auf dem Home-Bildschirm heißt die App kurz „Fahrtkosten“.
+Alle Wege mit demselben Stand (Version 3.7). Auf dem Home-Bildschirm heißt die App kurz „Fahrtkosten“.
 Logo „Fahrschein“: Quelle in `android/symbol.js` (`node android/symbol.js` erzeugt alle Symbolgrößen und `app/symbol.png`).
 
 | Datei | Für | Daten liegen |
@@ -24,6 +24,8 @@ Logo „Fahrschein“: Quelle in `android/symbol.js` (`node android/symbol.js` e
 - Tagesfahrten landen in einem Antrag 035_002 mit Anlage 035_016. Jede mehrtägige Reise (z. B. Kompaktseminar) bekommt einen
   eigenen Antrag mit Tagegeld (14 € An-/Abreisetag, 28 € voller Tag), Übernachtung (20 € pauschal oder Hotel lt. Rechnung)
   und gestellten Mahlzeiten. Nach dem Erstellen zeigt die App eine Vorschau aller Seiten; jedes Teil lässt sich einzeln speichern.
+- Beim Abrechnen schlägt die App „Grund der RKR“ vor (AFR + Reisedaten). Abkürzung (DR, VR, AFR, RPR, RRS, GNE oder
+  sonstige), „Grund der RKR“ und „noch Grund der RKR“ lassen sich für den Antrag ändern.
 - Weitere Funktionen: Tagegeld automatisch ab mehr als 8 Std. oder per Knopf, Mitfahrt und Fahrgemeinschaft (G4),
   Erkennung fehlender Rückfahrt, Strecke wahlweise ab Wohnung oder kürzer ab Ausbildungsschule (Nr. 2.1.5 VV-NRKVO,
   mit Häkchen „Einführungswoche“), Warnung bei doppelten Tagen und Überschneidungen, Pkw + G-Grund + Fahrrad in einem

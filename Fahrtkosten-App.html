@@ -35,6 +35,7 @@ h3 { font-size: 1rem; }
 a { color: var(--accent); }
 .muted { color: var(--muted); }
 .small { font-size: .875rem; }
+[hidden] { display: none !important; }
 .stack { display: flex; flex-direction: column; gap: 12px; }
 .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .grow { flex: 1 1 auto; min-width: 0; }
@@ -641,13 +642,29 @@ nav.tabs button[aria-current="page"] { color: var(--accent); }
     return { w, mittel, belege: !!(fahrkarte || sonstige) };
   }
 
-  /** Sammelantrag für Tagesfahrten; Einzelheiten stehen in der Anlage 035_016. */
-  function werteAntrag(profil, fahrten, blaetter) {
-    const { w, mittel, belege } = basisAntrag(profil, fahrten);
+  // Abkürzungen für „Grund der RKR“ laut Formular 035_002 (leer = sonstige Reise, ohne Abkürzung erläutern)
+  const RKR_ARTEN = [["AFR", "Aus- u. Fortbildungsreise"], ["DR", "Dienstreise"], ["VR", "Vorstellungsreise"],
+    ["RPR", "Reise d. Personalrats"], ["RRS", "Reise in einer Rechtssache"], ["GNE", "Genehmigungsfreie Reise"],
+    ["", "Sonstige Reise (ohne Abkürzung erläutern)"]];
+
+  /** Vorschlag für „Grund der RKR“ und „noch Grund der RKR“ im Sammelantrag. */
+  function grundVorschlag(fahrten) {
     const daten = datenText(fahrten);
-    const grund = `AFR, Ausbildungsfahrten lt. Anlage 035_016: ${daten}`;
-    if (grund.length <= 75) w.Grund_der_RKR = grund;
-    else { w.Grund_der_RKR = "AFR, Ausbildungsfahrten lt. Anlage 035_016 (Daten s. Anlage)"; w.Grund_der_RKR1 = daten; }
+    const text = `Ausbildungsfahrten lt. Anlage 035_016: ${daten}`;
+    if (`AFR, ${text}`.length <= 75) return { kuerzel: "AFR", text, noch: "" };
+    return { kuerzel: "AFR", text: "Ausbildungsfahrten lt. Anlage 035_016 (Daten s. Anlage)", noch: daten };
+  }
+
+  function grundZeile(kuerzel, text) {
+    return [(kuerzel || "").trim(), (text || "").trim()].filter(Boolean).join(", ");
+  }
+
+  /** Sammelantrag für Tagesfahrten; Einzelheiten stehen in der Anlage 035_016. grund: eigene Angaben {kuerzel, text, noch}. */
+  function werteAntrag(profil, fahrten, blaetter, grund) {
+    const { w, mittel, belege } = basisAntrag(profil, fahrten);
+    const g = grund || grundVorschlag(fahrten);
+    w.Grund_der_RKR = grundZeile(g.kuerzel, g.text);
+    if ((g.noch || "").trim()) w.Grund_der_RKR1 = g.noch.trim();
 
     const siehe = "siehe Anlage 035_016";
     Object.assign(w, { Beginn_der_Dienstreise: siehe, Beginn_des_Dienstgeschaefts: siehe,
@@ -672,10 +689,10 @@ nav.tabs button[aria-current="page"] { color: var(--accent); }
   }
 
   /** Eigener Antrag für eine mehrtägige Reise (z. B. Kompaktseminar): Zeiten, Tagegeld und Übernachtung direkt im Antrag. */
-  function werteAntragMehrtaegig(profil, { f, r }) {
+  function werteAntragMehrtaegig(profil, { f, r }, kuerzel = "AFR") {
     const { w, belege } = basisAntrag(profil, [{ f, r }]);
     const anlass = f.anlass === "d" ? f.anlassText : (f.kompakt ? "Kompaktseminar" : "Seminarveranstaltung");
-    w.Grund_der_RKR = `AFR, ${anlass}, ${deDatum(f.datum).slice(0, 6)}–${deDatum(f.datumBis)}`;
+    w.Grund_der_RKR = grundZeile(kuerzel, `${anlass}, ${deDatum(f.datum).slice(0, 6)}–${deDatum(f.datumBis)}`);
     if ((f.genehmigung || "").trim()) { w.OBJ3 = true; w.Dienststelle_Datum = f.genehmigung.trim(); }
     Object.assign(w, {
       Beginn_der_Dienstreise: `${deDatum(f.datum)}, ${f.abfahrt} Uhr`,
@@ -711,7 +728,7 @@ nav.tabs button[aria-current="page"] { color: var(--accent); }
   const FELDNAMEN = {
     Begruendung_nein: "Begründung ohne Geschäftskundenrabatt", Strecke: "Ermäßigungskarte", Beschaeftigungsstelle: "Beschäftigungsstelle",
     Name__Vorname: "Name", Abrechnende_Dienststelle: "Abrechnende Dienststelle", Reiseziel_Reiseweg: "Reiseziel/Reiseweg",
-    Verpflegung: "Gestellte Mahlzeiten", Dienststelle_Datum: "Genehmigt durch", Grund_der_RKR: "Grund der Reise",
+    Verpflegung: "Gestellte Mahlzeiten", Dienststelle_Datum: "Genehmigt durch", Grund_der_RKR: "Grund der Reise", Grund_der_RKR1: "noch Grund der Reise",
     Name_Schule: "Schulname und Adresse", Adresse_Antragsteller: "Wohnanschrift", Seminarveranstaltung_in_Ort: "Ort der Veranstaltung",
     Begruendung: "Begründung G1–G5", Erlaeuterungen: "Erläuterungen", Wohnungsanschrift: "Wohnanschrift",
   };
@@ -810,7 +827,7 @@ nav.tabs button[aria-current="page"] { color: var(--accent); }
    * Tagesfahrten: ein Antrag 035_002 + Anlage(n) 035_016. Jede mehrtägige Reise: ein eigener Antrag.
    * Liefert die Gesamtdatei und jedes Teil einzeln (zum getrennten Speichern und für die Vorschau).
    */
-  async function erzeugePdf(PDFLib, { profil, fahrten, antragBytes, anlageBytes }) {
+  async function erzeugePdf(PDFLib, { profil, fahrten, antragBytes, anlageBytes, grund }) {
     const sortiert = [...fahrten].sort((x, y) => (x.f.datum + x.f.abfahrt).localeCompare(y.f.datum + y.f.abfahrt));
     const tagesfahrten = sortiert.filter(({ r }) => !r.mehrtaegig);
     const mehrtaegig = sortiert.filter(({ r }) => r.mehrtaegig);
@@ -821,7 +838,7 @@ nav.tabs button[aria-current="page"] { color: var(--accent); }
       const blaetter = [];
       for (let i = 0; i < tagesfahrten.length; i += ZEILEN_JE_ANLAGE) blaetter.push(tagesfahrten.slice(i, i + ZEILEN_JE_ANLAGE));
       teile.push({ art: "antrag", titel: `Antrag 035_002 für ${tagesfahrten.length} Tagesfahrt${tagesfahrten.length === 1 ? "" : "en"}`, dateiname: "Antrag_035_002",
-        docs: [await fuelle(PDFLib, antragBytes, werteAntrag(profil, tagesfahrten, blaetter.length), "Antrag", zuLang)] });
+        docs: [await fuelle(PDFLib, antragBytes, werteAntrag(profil, tagesfahrten, blaetter.length, grund), "Antrag", zuLang)] });
       const anlageDocs = [];
       for (let i = 0; i < blaetter.length; i++) {
         anlageDocs.push(await fuelle(PDFLib, anlageBytes, werteAnlage(profil, blaetter[i]), `Anlage Blatt ${i + 1}`, zuLang));
@@ -831,7 +848,7 @@ nav.tabs button[aria-current="page"] { color: var(--accent); }
     for (const x of mehrtaegig) {
       teile.push({ art: "mehrtaegig", titel: `Antrag 035_002 für die Reise ${deDatum(x.f.datum).slice(0, 6)}–${deDatum(x.f.datumBis)}`,
         dateiname: `Antrag_035_002_${x.f.datum}_bis_${x.f.datumBis}`,
-        docs: [await fuelle(PDFLib, antragBytes, werteAntragMehrtaegig(profil, x), `Antrag ${deDatum(x.f.datum)}`, zuLang)] });
+        docs: [await fuelle(PDFLib, antragBytes, werteAntragMehrtaegig(profil, x, grund ? grund.kuerzel : "AFR"), `Antrag ${deDatum(x.f.datum)}`, zuLang)] });
     }
 
     let seite = 1;
@@ -852,7 +869,7 @@ nav.tabs button[aria-current="page"] { color: var(--accent); }
 
   const Kern = { SATZ_KLEIN, SATZ_GROSS, SATZ_FAHRRAD, DECKEL_KLEIN, TAGEGELD, TAGEGELD_VOLL, GRUENDE,
     UEBERNACHTUNG_PAUSCHAL, UEBERNACHTUNG_GRENZE, UEBERNACHTUNG_KOMPAKT,
-    isoHeute, deDatum, fristEnde, berechne, istMehrtaegig, g2Vorschlag, g4Vorschlag, werteAntrag, werteAntragMehrtaegig, werteAnlage, erzeugePdf, eur, km };
+    isoHeute, deDatum, fristEnde, berechne, istMehrtaegig, g2Vorschlag, g4Vorschlag, RKR_ARTEN, grundVorschlag, werteAntrag, werteAntragMehrtaegig, werteAnlage, erzeugePdf, eur, km };
   if (typeof module !== "undefined" && module.exports) module.exports = Kern;
   else root.Kern = Kern;
 })(typeof globalThis !== "undefined" ? globalThis : this);
@@ -863,7 +880,7 @@ nav.tabs button[aria-current="page"] { color: var(--accent); }
 <script>
 "use strict";
 const K = window.Kern;
-const APP_VERSION = "3.6";
+const APP_VERSION = "3.7";
 const TYPEN = { wohnung: "Wohnung", ausbildungsschule: "Ausbildungsschule", seminar: "Studienseminar", sonstiges: "Sonstiger Ort" };
 const MITTEL = { pkw: "Pkw", mitfahrt: "Mitfahrt", oepnv: "Bus/Bahn", fahrrad: "Fahrrad" };
 
@@ -1422,6 +1439,8 @@ function viewAbrechnen() {
   const gruppen = {};
   abgerechnet.forEach((f) => { (gruppen[f.abgerechnetAm] = gruppen[f.abgerechnetAm] || []).push(f); });
   const p = profil();
+  const tages = gewaehlt.filter(({ r }) => !r.mehrtaegig), mehr = gewaehlt.length - tages.length;
+  grundAktualisieren(tages);
   return `<div class="top"><h1>Abrechnen</h1></div><div class="stack">${beispielBanner()}
     ${!eingerichtet() ? `<div class="banner warn">Bitte zuerst unter „Meine Daten“ Name und Orte eintragen.</div>` : ""}
     <div class="grid2"><label for="a-von">Fahrten vom<input type="date" id="a-von" value="${a.von}"></label>
@@ -1440,6 +1459,15 @@ function viewAbrechnen() {
       <div class="grid2"><label for="a-iban">IBAN<input id="a-iban" value="${esc(a.iban || "")}" autocomplete="off" spellcheck="false" placeholder="DE00 0000 …"></label>
         <label for="a-bic">BIC<input id="a-bic" value="${esc(a.bic || "")}" autocomplete="off" spellcheck="false"></label></div>
       <span class="hint" id="a-iban-hint">${ibanHinweis(a.iban)}</span></fieldset>` : ""}
+    ${gewaehlt.length ? `<fieldset class="stack"><legend>Grund der Reise im Antrag</legend>
+      <label for="a-rkr">Art der Reise (Abkürzung für „Grund der RKR“)<select id="a-rkr">${K.RKR_ARTEN.map(([k, l]) =>
+        `<option value="${k}" ${a.grund.kuerzel === k ? "selected" : ""}>${k ? `${k} – ${l}` : l}</option>`).join("")}</select></label>
+      ${tages.length ? `<label for="a-grund">Grund der RKR<input id="a-grund" value="${esc(a.grund.text)}" autocomplete="off"></label>
+      <label for="a-noch">noch Grund der RKR<input id="a-noch" value="${esc(a.grund.noch)}" autocomplete="off" placeholder="leer lassen, wenn nicht nötig"></label>
+      <span class="hint" id="a-grund-hint">${grundHinweis()}</span>
+      <button type="button" class="btn ghost small" id="a-grund-auto" style="align-self:flex-start" ${a.grund.eigen ? "" : "hidden"}>Vorschlag aus den Fahrten wieder einsetzen</button>` : ""}
+      ${mehr ? `<span class="hint">${tages.length ? "Bei mehrtägigen Reisen" : "Im Antrag"} steht die Abkürzung vor dem Anlass und den Reisedaten.</span>` : ""}
+    </fieldset>` : ""}
     <button class="btn primary wide" id="pdf" ${gewaehlt.length && eingerichtet() ? "" : "disabled"}>Antrag und Anlage als PDF erstellen</button>
     <div id="pdf-status"></div>
     ${a.erstellt ? `<div class="stack"><h3>Erstellt: ${a.erstellt.out.seiten} Seiten</h3>
@@ -1458,6 +1486,22 @@ function viewAbrechnen() {
       `<div class="pick"><span class="chip ok">✓</span><span>Abgegeben am <b>${K.deDatum(tag)}</b><br><span class="muted small">${fs.length} Fahrten, ${K.deDatum(fs.map((f) => f.datum).sort()[0]).slice(0, 6)} bis ${K.deDatum(fs.map((f) => f.datum).sort().pop())}</span></span>
        ${ui.bestaetigen === "zurueck-" + tag ? `<span class="row"><button class="btn danger" data-zurueck-ja="${tag}">Zurücksetzen</button><button class="btn" id="zurueck-nein">Nein</button></span>` : `<button class="btn ghost small" data-zurueck="${tag}">wieder öffnen</button>`}</div>`).join("")}</div></section>` : ""}
   </div>`;
+}
+
+/** Grund der RKR: Vorschlag aus den gewählten Tagesfahrten, bis man selbst etwas einträgt (gilt nur für diese Abrechnung). */
+function grundAktualisieren(tages) {
+  const a = ui.abr;
+  if (!a.grund) a.grund = { kuerzel: "AFR", text: "", noch: "", eigen: false };
+  a.grund.vorschlag = tages.length ? K.grundVorschlag(tages) : null;
+  if (!a.grund.eigen && a.grund.vorschlag) Object.assign(a.grund, { text: a.grund.vorschlag.text, noch: a.grund.vorschlag.noch });
+}
+
+function grundHinweis() {
+  const g = ui.abr.grund;
+  const zeile = [g.kuerzel, g.text.trim()].filter(Boolean).join(", ");
+  const lang = zeile.length > 75 || g.noch.trim().length > 75;
+  return `Im Antrag steht: <b>${esc(zeile || "–")}</b>${g.noch.trim() ? ` / <b>${esc(g.noch.trim())}</b>` : ""}.`
+    + (lang ? " Etwa 75 Zeichen passen in eine Zeile, längerer Text wird klein gesetzt." : g.eigen ? "" : " Vorschlag aus den gewählten Fahrten, du kannst ihn ändern.");
 }
 
 /** IBAN nur für die nächste PDF: lebt im Arbeitsspeicher (ui.abr), wird nie gespeichert oder gesichert. */
@@ -1504,7 +1548,7 @@ function b64(id) {
 
 function hookAbrechnen() {
   const a = ui.abr;
-  const neu = () => { a.aus = null; a.erstellt = null; render(); };
+  const neu = () => { a.aus = null; a.erstellt = null; if (a.grund) a.grund.eigen = false; render(); };
   $("#a-von").addEventListener("change", (e) => { if (e.target.value) { a.von = e.target.value; neu(); } });
   $("#a-bis").addEventListener("change", (e) => { if (e.target.value) { a.bis = e.target.value; neu(); } });
   document.querySelectorAll("[data-pick]").forEach((c) => c.addEventListener("change", () => {
@@ -1512,6 +1556,14 @@ function hookAbrechnen() {
   const einmal = (id, feld) => { const el = $(id); if (el) el.addEventListener("input", () => {
     a[feld] = el.value.trim().toUpperCase(); a.erstellt = null; $("#a-iban-hint").textContent = ibanHinweis(a.iban); }); };
   einmal("#a-iban", "iban"); einmal("#a-bic", "bic");
+  const rkr = $("#a-rkr");
+  if (rkr) rkr.addEventListener("change", () => { a.grund.kuerzel = rkr.value; a.erstellt = null; render(); });
+  const grundFeld = (id, feld) => { const el = $(id); if (el) el.addEventListener("input", () => {
+    a.grund[feld] = el.value; a.grund.eigen = true; a.erstellt = null;
+    $("#a-grund-hint").innerHTML = grundHinweis(); $("#a-grund-auto").hidden = false; }); };
+  grundFeld("#a-grund", "text"); grundFeld("#a-noch", "noch");
+  const auto = $("#a-grund-auto");
+  if (auto) auto.addEventListener("click", () => { a.grund.eigen = false; a.erstellt = null; render(); });
   $("#pdf").addEventListener("click", async () => {
     const status = $("#pdf-status");
     // Gespeicherte Bankdaten gehen vor; sonst die nur für diese PDF eingegebenen (nicht gespeichert)
@@ -1522,7 +1574,8 @@ function hookAbrechnen() {
     let out;
     try {
       if (!window.PDFLib) throw new Error("Die PDF-Bibliothek ist nicht geladen. Bitte mit Internetverbindung neu laden.");
-      out = await K.erzeugePdf(window.PDFLib, { profil: fuerPdf, fahrten: gewaehlt, antragBytes: b64("#pdf-antrag"), anlageBytes: b64("#pdf-anlage") });
+      out = await K.erzeugePdf(window.PDFLib, { profil: fuerPdf, fahrten: gewaehlt, antragBytes: b64("#pdf-antrag"), anlageBytes: b64("#pdf-anlage"),
+        grund: { kuerzel: a.grund.kuerzel, text: a.grund.text, noch: a.grund.noch } });
     } catch (err) {
       status.innerHTML = `<div class="banner bad">${esc(err.message || "PDF konnte nicht erstellt werden.")}</div>`;
       return;

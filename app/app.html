@@ -38,6 +38,7 @@ h3 { font-size: 1rem; }
 a { color: var(--accent); }
 .muted { color: var(--muted); }
 .small { font-size: .875rem; }
+[hidden] { display: none !important; }
 .stack { display: flex; flex-direction: column; gap: 12px; }
 .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .grow { flex: 1 1 auto; min-width: 0; }
@@ -751,6 +752,8 @@ function viewAbrechnen() {
   const gruppen = {};
   abgerechnet.forEach((f) => { (gruppen[f.abgerechnetAm] = gruppen[f.abgerechnetAm] || []).push(f); });
   const p = profil();
+  const tages = gewaehlt.filter(({ r }) => !r.mehrtaegig), mehr = gewaehlt.length - tages.length;
+  grundAktualisieren(tages);
   return `<div class="top"><h1>Abrechnen</h1></div><div class="stack">${beispielBanner()}
     ${!eingerichtet() ? `<div class="banner warn">Bitte zuerst unter „Meine Daten“ Name und Orte eintragen.</div>` : ""}
     <div class="grid2"><label for="a-von">Fahrten vom<input type="date" id="a-von" value="${a.von}"></label>
@@ -769,6 +772,15 @@ function viewAbrechnen() {
       <div class="grid2"><label for="a-iban">IBAN<input id="a-iban" value="${esc(a.iban || "")}" autocomplete="off" spellcheck="false" placeholder="DE00 0000 …"></label>
         <label for="a-bic">BIC<input id="a-bic" value="${esc(a.bic || "")}" autocomplete="off" spellcheck="false"></label></div>
       <span class="hint" id="a-iban-hint">${ibanHinweis(a.iban)}</span></fieldset>` : ""}
+    ${gewaehlt.length ? `<fieldset class="stack"><legend>Grund der Reise im Antrag</legend>
+      <label for="a-rkr">Art der Reise (Abkürzung für „Grund der RKR“)<select id="a-rkr">${K.RKR_ARTEN.map(([k, l]) =>
+        `<option value="${k}" ${a.grund.kuerzel === k ? "selected" : ""}>${k ? `${k} – ${l}` : l}</option>`).join("")}</select></label>
+      ${tages.length ? `<label for="a-grund">Grund der RKR<input id="a-grund" value="${esc(a.grund.text)}" autocomplete="off"></label>
+      <label for="a-noch">noch Grund der RKR<input id="a-noch" value="${esc(a.grund.noch)}" autocomplete="off" placeholder="leer lassen, wenn nicht nötig"></label>
+      <span class="hint" id="a-grund-hint">${grundHinweis()}</span>
+      <button type="button" class="btn ghost small" id="a-grund-auto" style="align-self:flex-start" ${a.grund.eigen ? "" : "hidden"}>Vorschlag aus den Fahrten wieder einsetzen</button>` : ""}
+      ${mehr ? `<span class="hint">${tages.length ? "Bei mehrtägigen Reisen" : "Im Antrag"} steht die Abkürzung vor dem Anlass und den Reisedaten.</span>` : ""}
+    </fieldset>` : ""}
     <button class="btn primary wide" id="pdf" ${gewaehlt.length && eingerichtet() ? "" : "disabled"}>Antrag und Anlage als PDF erstellen</button>
     <div id="pdf-status"></div>
     ${a.erstellt ? `<div class="stack"><h3>Erstellt: ${a.erstellt.out.seiten} Seiten</h3>
@@ -787,6 +799,22 @@ function viewAbrechnen() {
       `<div class="pick"><span class="chip ok">✓</span><span>Abgegeben am <b>${K.deDatum(tag)}</b><br><span class="muted small">${fs.length} Fahrten, ${K.deDatum(fs.map((f) => f.datum).sort()[0]).slice(0, 6)} bis ${K.deDatum(fs.map((f) => f.datum).sort().pop())}</span></span>
        ${ui.bestaetigen === "zurueck-" + tag ? `<span class="row"><button class="btn danger" data-zurueck-ja="${tag}">Zurücksetzen</button><button class="btn" id="zurueck-nein">Nein</button></span>` : `<button class="btn ghost small" data-zurueck="${tag}">wieder öffnen</button>`}</div>`).join("")}</div></section>` : ""}
   </div>`;
+}
+
+/** Grund der RKR: Vorschlag aus den gewählten Tagesfahrten, bis man selbst etwas einträgt (gilt nur für diese Abrechnung). */
+function grundAktualisieren(tages) {
+  const a = ui.abr;
+  if (!a.grund) a.grund = { kuerzel: "AFR", text: "", noch: "", eigen: false };
+  a.grund.vorschlag = tages.length ? K.grundVorschlag(tages) : null;
+  if (!a.grund.eigen && a.grund.vorschlag) Object.assign(a.grund, { text: a.grund.vorschlag.text, noch: a.grund.vorschlag.noch });
+}
+
+function grundHinweis() {
+  const g = ui.abr.grund;
+  const zeile = [g.kuerzel, g.text.trim()].filter(Boolean).join(", ");
+  const lang = zeile.length > 75 || g.noch.trim().length > 75;
+  return `Im Antrag steht: <b>${esc(zeile || "–")}</b>${g.noch.trim() ? ` / <b>${esc(g.noch.trim())}</b>` : ""}.`
+    + (lang ? " Etwa 75 Zeichen passen in eine Zeile, längerer Text wird klein gesetzt." : g.eigen ? "" : " Vorschlag aus den gewählten Fahrten, du kannst ihn ändern.");
 }
 
 /** IBAN nur für die nächste PDF: lebt im Arbeitsspeicher (ui.abr), wird nie gespeichert oder gesichert. */
@@ -833,7 +861,7 @@ function b64(id) {
 
 function hookAbrechnen() {
   const a = ui.abr;
-  const neu = () => { a.aus = null; a.erstellt = null; render(); };
+  const neu = () => { a.aus = null; a.erstellt = null; if (a.grund) a.grund.eigen = false; render(); };
   $("#a-von").addEventListener("change", (e) => { if (e.target.value) { a.von = e.target.value; neu(); } });
   $("#a-bis").addEventListener("change", (e) => { if (e.target.value) { a.bis = e.target.value; neu(); } });
   document.querySelectorAll("[data-pick]").forEach((c) => c.addEventListener("change", () => {
@@ -841,6 +869,14 @@ function hookAbrechnen() {
   const einmal = (id, feld) => { const el = $(id); if (el) el.addEventListener("input", () => {
     a[feld] = el.value.trim().toUpperCase(); a.erstellt = null; $("#a-iban-hint").textContent = ibanHinweis(a.iban); }); };
   einmal("#a-iban", "iban"); einmal("#a-bic", "bic");
+  const rkr = $("#a-rkr");
+  if (rkr) rkr.addEventListener("change", () => { a.grund.kuerzel = rkr.value; a.erstellt = null; render(); });
+  const grundFeld = (id, feld) => { const el = $(id); if (el) el.addEventListener("input", () => {
+    a.grund[feld] = el.value; a.grund.eigen = true; a.erstellt = null;
+    $("#a-grund-hint").innerHTML = grundHinweis(); $("#a-grund-auto").hidden = false; }); };
+  grundFeld("#a-grund", "text"); grundFeld("#a-noch", "noch");
+  const auto = $("#a-grund-auto");
+  if (auto) auto.addEventListener("click", () => { a.grund.eigen = false; a.erstellt = null; render(); });
   $("#pdf").addEventListener("click", async () => {
     const status = $("#pdf-status");
     // Gespeicherte Bankdaten gehen vor; sonst die nur für diese PDF eingegebenen (nicht gespeichert)
@@ -851,7 +887,8 @@ function hookAbrechnen() {
     let out;
     try {
       if (!window.PDFLib) throw new Error("Die PDF-Bibliothek ist nicht geladen. Bitte mit Internetverbindung neu laden.");
-      out = await K.erzeugePdf(window.PDFLib, { profil: fuerPdf, fahrten: gewaehlt, antragBytes: b64("#pdf-antrag"), anlageBytes: b64("#pdf-anlage") });
+      out = await K.erzeugePdf(window.PDFLib, { profil: fuerPdf, fahrten: gewaehlt, antragBytes: b64("#pdf-antrag"), anlageBytes: b64("#pdf-anlage"),
+        grund: { kuerzel: a.grund.kuerzel, text: a.grund.text, noch: a.grund.noch } });
     } catch (err) {
       status.innerHTML = `<div class="banner bad">${esc(err.message || "PDF konnte nicht erstellt werden.")}</div>`;
       return;

@@ -169,6 +169,19 @@ test("Formularwerte: Antrag mit zwei km-Sätzen, Anlage mit Dienstort", () => {
   assert.equal(w.Summe_Strecke, "145");
 });
 
+test("Grund der RKR: Vorschlag AFR, eigene Angaben gehen vor", () => {
+  const liste = [fahrt({}), fahrt({ datum: "2026-10-14" })].map((f) => ({ f, r: K.berechne(f, ORTE, HEUTE) }));
+  const v = K.grundVorschlag(liste);
+  assert.equal(v.kuerzel, "AFR");
+  assert.equal(K.werteAntrag(PROFIL, liste, 1).Grund_der_RKR, `AFR, ${v.text}`);
+  const a = K.werteAntrag(PROFIL, liste, 1, { kuerzel: "DR", text: " Fachtagung Hannover ", noch: "Daten s. Anlage" });
+  assert.equal(a.Grund_der_RKR, "DR, Fachtagung Hannover");
+  assert.equal(a.Grund_der_RKR1, "Daten s. Anlage");
+  const ohne = K.werteAntrag(PROFIL, liste, 1, { kuerzel: "", text: "Sonstige Reise", noch: "" });
+  assert.equal(ohne.Grund_der_RKR, "Sonstige Reise");
+  assert.equal(ohne.Grund_der_RKR1, undefined);
+});
+
 test("Ohne IBAN bleiben IBAN- und BIC-Felder im Antrag leer", () => {
   const liste = [fahrt({})].map((f) => ({ f, r: K.berechne(f, ORTE, HEUTE) }));
   const w = K.werteAntrag({ ...PROFIL, iban: "", bic: "" }, liste, 1);
